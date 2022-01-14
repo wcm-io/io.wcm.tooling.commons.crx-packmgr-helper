@@ -53,6 +53,7 @@ import javax.jcr.Value;
 import javax.jcr.ValueFormatException;
 import javax.jcr.nodetype.NodeType;
 import javax.jcr.nodetype.PropertyDefinition;
+import javax.xml.XMLConstants;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
@@ -162,7 +163,7 @@ public final class ContentUnpacker {
   }
 
   private boolean applyXmlExcludes(String name) {
-    if (this.excludeNodes.length == 0 & this.excludeProperties.length == 0) {
+    if (this.excludeNodes.length == 0 && this.excludeProperties.length == 0) {
       return false;
     }
     return StringUtils.endsWith(name, ".xml");
@@ -174,9 +175,7 @@ public final class ContentUnpacker {
    * @param outputDirectory Output directory
    */
   public void unpack(File file, File outputDirectory) {
-    ZipFile zipFile = null;
-    try {
-      zipFile = new ZipFile(file);
+    try (ZipFile zipFile = new ZipFile(file)) {
       Enumeration<ZipArchiveEntry> entries = zipFile.getEntries();
       while (entries.hasMoreElements()) {
         ZipArchiveEntry entry = entries.nextElement();
@@ -188,9 +187,6 @@ public final class ContentUnpacker {
     catch (IOException ex) {
       throw new PackageManagerException("Error reading content package " + file.getAbsolutePath(), ex);
     }
-    finally {
-      IOUtils.closeQuietly(zipFile);
-    }
   }
 
   @SuppressFBWarnings("RV_RETURN_VALUE_IGNORED_BAD_PRACTICE")
@@ -200,39 +196,34 @@ public final class ContentUnpacker {
       directory.mkdirs();
     }
     else {
-      InputStream entryStream = null;
-      FileOutputStream fos = null;
-      try {
-        Set<String> namespacePrefixes = null;
-        if (applyXmlExcludes(entry.getName())) {
-          namespacePrefixes = getNamespacePrefixes(zipFile, entry);
-        }
+      Set<String> namespacePrefixes = null;
+      if (applyXmlExcludes(entry.getName())) {
+        namespacePrefixes = getNamespacePrefixes(zipFile, entry);
+      }
 
-        entryStream = zipFile.getInputStream(entry);
+      try (InputStream entryStream = zipFile.getInputStream(entry)) {
         File outputFile = FileUtils.getFile(outputDirectory, entry.getName());
         if (outputFile.exists()) {
           outputFile.delete();
         }
         File directory = outputFile.getParentFile();
         directory.mkdirs();
-        fos = new FileOutputStream(outputFile);
-        if (applyXmlExcludes(entry.getName()) && namespacePrefixes != null) {
-          // write file with XML filtering
-          try {
-            writeXmlWithExcludes(entry, entryStream, fos, namespacePrefixes);
+
+        try (FileOutputStream fos = new FileOutputStream(outputFile)) {
+          if (applyXmlExcludes(entry.getName()) && namespacePrefixes != null) {
+            // write file with XML filtering
+            try {
+              writeXmlWithExcludes(entry, entryStream, fos, namespacePrefixes);
+            }
+            catch (JDOMException ex) {
+              throw new PackageManagerException("Unable to parse XML file: " + entry.getName(), ex);
+            }
           }
-          catch (JDOMException ex) {
-            throw new PackageManagerException("Unable to parse XML file: " + entry.getName(), ex);
+          else {
+            // write file directly without XML filtering
+            IOUtils.copy(entryStream, fos);
           }
         }
-        else {
-          // write file directly without XML filtering
-          IOUtils.copy(entryStream, fos);
-        }
-      }
-      finally {
-        IOUtils.closeQuietly(entryStream);
-        IOUtils.closeQuietly(fos);
       }
     }
   }
@@ -283,6 +274,8 @@ public final class ContentUnpacker {
   private void writeXmlWithExcludes(ZipArchiveEntry entry, InputStream inputStream, OutputStream outputStream, Set<String> namespacePrefixes)
       throws IOException, JDOMException {
     SAXBuilder saxBuilder = new SAXBuilder();
+    saxBuilder.setProperty(XMLConstants.ACCESS_EXTERNAL_DTD, "");
+    saxBuilder.setProperty(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "");
     Document doc = saxBuilder.build(inputStream);
 
     Set<String> namespacePrefixesActuallyUsed = new HashSet<>();
@@ -319,8 +312,7 @@ public final class ContentUnpacker {
   }
 
   private String getParentPath(ZipArchiveEntry entry) {
-    String path = StringUtils.removeEnd(StringUtils.removeStart(entry.getName(), ROOT_DIR), "/" + DOT_CONTENT_XML);
-    return path;
+    return StringUtils.removeEnd(StringUtils.removeStart(entry.getName(), ROOT_DIR), "/" + DOT_CONTENT_XML);
   }
 
   private String buildElementPath(Element element, String parentPath) {
@@ -485,8 +477,7 @@ public final class ContentUnpacker {
       values.add(new MockValue(ref, propertyType));
     }
     try {
-      String sortedValues = DocViewProperty.format(new MockProperty(name, true, values.toArray(new Value[0])));
-      return sortedValues;
+      return DocViewProperty.format(new MockProperty(name, true, values.toArray(new Value[0])));
     }
     catch (RepositoryException ex) {
       throw new RuntimeException("Unable to format value for " + name, ex);

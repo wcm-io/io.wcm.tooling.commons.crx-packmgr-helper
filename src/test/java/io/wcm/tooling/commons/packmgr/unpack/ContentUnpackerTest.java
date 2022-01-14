@@ -118,7 +118,7 @@ class ContentUnpackerTest {
   }
 
   @Test
-  public void testGetNamespacePrefix() {
+  void testGetNamespacePrefix() {
     assertNull(getNamespacePrefix("aaa"));
     assertNull(getNamespacePrefix("aaa/bbb"));
     assertNull(getNamespacePrefix("aaa/_cq_bbb"));

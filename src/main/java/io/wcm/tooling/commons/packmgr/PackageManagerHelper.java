@@ -300,8 +300,7 @@ public final class PackageManagerHelper {
    */
   public String executePackageManagerMethodHtml(CloseableHttpClient httpClient, HttpClientContext context, HttpRequestBase method) {
     PackageManagerHtmlCall call = new PackageManagerHtmlCall(httpClient, context, method);
-    String message = executeHttpCallWithRetry(call, 0);
-    return message;
+    return executeHttpCallWithRetry(call, 0);
   }
 
   /**

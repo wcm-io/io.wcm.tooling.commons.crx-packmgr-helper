@@ -118,7 +118,7 @@ public class ComposumPackageInstaller implements VendorPackageInstaller {
     if (seconds > 0) {
       log.info("Wait {} seconds after package install...", seconds);
       try {
-        Thread.sleep(seconds * 1000);
+        Thread.sleep(seconds * 1000L);
       }
       catch (InterruptedException ex) {
         // ignore
