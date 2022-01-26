@@ -24,6 +24,9 @@
   <body>
 
     <release version="2.0.4" date="not released">
+      <action type="update" dev="sseifert">
+        Remove OSGi bundle metadata (JAR was never deployed to OSGi).
+      </action>
       <action type="fix" dev="sseifert">
         ContentUnpacker: XML parsers should not be vulnerable to XXE attacks.
       </action>
