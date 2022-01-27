@@ -20,5 +20,4 @@
 /**
  * Content unpacker
  */
-@org.osgi.annotation.versioning.Version("1.4.0")
 package io.wcm.tooling.commons.packmgr.unpack;

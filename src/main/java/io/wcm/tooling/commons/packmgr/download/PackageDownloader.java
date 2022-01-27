@@ -142,11 +142,11 @@ public final class PackageDownloader implements Closeable {
           }
 
           // write response file
-          FileOutputStream fos = new FileOutputStream(outputFileObject);
-          IOUtils.copy(responseStream, fos);
-          fos.flush();
-          responseStream.close();
-          fos.close();
+          try (FileOutputStream fos = new FileOutputStream(outputFileObject)) {
+            IOUtils.copy(responseStream, fos);
+            fos.flush();
+            responseStream.close();
+          }
 
           log.info("Package downloaded to {}", outputFileObject.getAbsolutePath());
 
