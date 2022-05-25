@@ -67,6 +67,8 @@ import io.wcm.tooling.commons.packmgr.httpaction.BundleStatusCall;
 import io.wcm.tooling.commons.packmgr.httpaction.HttpCall;
 import io.wcm.tooling.commons.packmgr.httpaction.PackageManagerHtmlCall;
 import io.wcm.tooling.commons.packmgr.httpaction.PackageManagerHtmlMessageCall;
+import io.wcm.tooling.commons.packmgr.httpaction.PackageManagerInstallStatus;
+import io.wcm.tooling.commons.packmgr.httpaction.PackageManagerInstallStatusCall;
 import io.wcm.tooling.commons.packmgr.httpaction.PackageManagerJsonCall;
 import io.wcm.tooling.commons.packmgr.httpaction.PackageManagerStatusCall;
 import io.wcm.tooling.commons.packmgr.httpaction.PackageManagerXmlCall;
@@ -369,6 +371,44 @@ public final class PackageManagerHelper {
             break;
           }
         }
+      }
+
+      // instance is ready
+      if (instanceReady) {
+        break;
+      }
+    }
+  }
+
+  /**
+   * Wait for package manager install status to become finished.
+   * @param httpClient HTTP client
+   * @param context HTTP client context
+   */
+  @SuppressWarnings("PMD.GuardLogStatement")
+  public void waitForPackageManagerInstallStatusFinished(CloseableHttpClient httpClient, HttpClientContext context) {
+    if (StringUtils.isBlank(props.getPackageManagerInstallStatusURL())) {
+      log.debug("Skipping check for package manager install state because no packageManagerInstallStatusURL is defined.");
+      return;
+    }
+
+    final int WAIT_INTERVAL_SEC = 3;
+    final long CHECK_RETRY_COUNT = props.getPackageManagerInstallStatusWaitLimitSec() / WAIT_INTERVAL_SEC;
+
+    log.info("Check package manager installation status...");
+    for (int i = 1; i <= CHECK_RETRY_COUNT; i++) {
+      PackageManagerInstallStatusCall call = new PackageManagerInstallStatusCall(httpClient, context,
+          props.getPackageManagerInstallStatusURL());
+      PackageManagerInstallStatus bundleStatus = executeHttpCallWithRetry(call, 0);
+
+      boolean instanceReady = true;
+
+      // check if bundles are still stopping/staring
+      if (!bundleStatus.isFinished()) {
+        log.info("Packager manager not ready: {} packages left for installation - wait {} sec (max. {} sec) ...",
+            bundleStatus.getItemCount(), WAIT_INTERVAL_SEC, props.getBundleStatusWaitLimitSec());
+        sleep(WAIT_INTERVAL_SEC);
+        instanceReady = false;
       }
 
       // instance is ready
