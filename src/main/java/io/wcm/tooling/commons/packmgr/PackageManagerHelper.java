@@ -399,14 +399,14 @@ public final class PackageManagerHelper {
     for (int i = 1; i <= CHECK_RETRY_COUNT; i++) {
       PackageManagerInstallStatusCall call = new PackageManagerInstallStatusCall(httpClient, context,
           props.getPackageManagerInstallStatusURL());
-      PackageManagerInstallStatus bundleStatus = executeHttpCallWithRetry(call, 0);
+      PackageManagerInstallStatus packageManagerStatus = executeHttpCallWithRetry(call, 0);
 
       boolean instanceReady = true;
 
-      // check if bundles are still stopping/staring
-      if (!bundleStatus.isFinished()) {
+      // check if package manager is still installing packages
+      if (!packageManagerStatus.isFinished()) {
         log.info("Packager manager not ready: {} packages left for installation - wait {} sec (max. {} sec) ...",
-            bundleStatus.getItemCount(), WAIT_INTERVAL_SEC, props.getBundleStatusWaitLimitSec());
+            packageManagerStatus.getItemCount(), WAIT_INTERVAL_SEC, props.getPackageManagerInstallStatusWaitLimitSec());
         sleep(WAIT_INTERVAL_SEC);
         instanceReady = false;
       }
