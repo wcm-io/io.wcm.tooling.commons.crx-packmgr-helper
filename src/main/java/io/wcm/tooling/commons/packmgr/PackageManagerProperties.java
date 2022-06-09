@@ -44,6 +44,8 @@ public final class PackageManagerProperties {
   private int bundleStatusWaitLimitSec = 360;
   private List<Pattern> bundleStatusBlacklistBundleNames = Collections.emptyList();
   private List<Pattern> bundleStatusWhitelistBundleNames = Collections.emptyList();
+  private String packageManagerInstallStatusURL;
+  private int packageManagerInstallStatusWaitLimitSec = 360;
   private boolean relaxedSSLCheck;
   private int httpConnectTimeoutSec = 10;
   private int httpSocketTimeoutSec = 60;
@@ -171,8 +173,8 @@ public final class PackageManagerProperties {
   /**
    * Bundle status JSON URL. If an URL is configured the activation status of all bundles in the system is checked
    * before it is tried to upload and install a new package and after each upload.
-   * If not all packages are installed the upload is delayed up to 10 minutes, every 5 seconds the
-   * activation status is checked anew.
+   * If not all bundles are activated the upload is delayed up to {link #getBundleStatusWaitLimitSec()} seconds, every 5
+   * seconds the activation status is checked anew.
    * Expected is an URL like: http://localhost:4502/system/console/bundles/.json
    * @return URL
    */
@@ -187,7 +189,7 @@ public final class PackageManagerProperties {
   /**
    * Number of seconds to wait as maximum for a positive bundle status check.
    * If this limit is reached and the bundle status is still not positive the install of the package proceeds anyway.
-   * @return Limit
+   * @return Limit in seconds
    */
   public int getBundleStatusWaitLimitSec() {
     return this.bundleStatusWaitLimitSec;
@@ -226,6 +228,38 @@ public final class PackageManagerProperties {
     this.bundleStatusWhitelistBundleNames = bundleStatusWhitelistBundleNames.stream()
         .map(Pattern::compile)
         .collect(Collectors.toList());
+  }
+
+  /**
+   * Package Manager installation status JSON URL. If an URL is configured the installation status of packages and
+   * embedded packages is checked before it is tried to upload and install a new package and after each upload.
+   * If not all packages are installed the upload is delayed up to {link #getPackageManagerInstallStatusWaitLimit()}
+   * seconds, every 5 seconds the activation status is checked anew.
+   * Expected is an URL like: http://localhost:4502/crx/packmgr/installstatus.jsp
+   * @return URL
+   */
+  public String getPackageManagerInstallStatusURL() {
+    return this.packageManagerInstallStatusURL;
+  }
+
+
+  public void setPackageManagerInstallStatusURL(String packageManagerInstallStatusURL) {
+    this.packageManagerInstallStatusURL = packageManagerInstallStatusURL;
+  }
+
+  /**
+   * Number of seconds to wait as maximum for a positive package manager install status check.
+   * If this limit is reached and the packager manager install status is still not positive the install of the package
+   * proceeds anyway.
+   * @return Limit in seconds
+   */
+  public int getPackageManagerInstallStatusWaitLimitSec() {
+    return this.packageManagerInstallStatusWaitLimitSec;
+  }
+
+
+  public void setPackageManagerInstallStatusWaitLimitSec(int packageManagerInstallStatusWaitLimitSec) {
+    this.packageManagerInstallStatusWaitLimitSec = packageManagerInstallStatusWaitLimitSec;
   }
 
   /**
