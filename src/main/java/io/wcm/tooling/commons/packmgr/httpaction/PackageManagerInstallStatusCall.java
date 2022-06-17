@@ -27,6 +27,7 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.protocol.HttpClientContext;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.util.EntityUtils;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -79,11 +80,16 @@ public final class PackageManagerInstallStatusCall implements HttpCall<PackageMa
     boolean finished = false;
     int itemCount = 0;
 
-    JSONObject json = new JSONObject(jsonString);
-    JSONObject status = json.optJSONObject("status");
-    if (status != null) {
-      finished = status.optBoolean("finished");
-      itemCount = status.optInt("itemCount");
+    try {
+      JSONObject json = new JSONObject(jsonString);
+      JSONObject status = json.optJSONObject("status");
+      if (status != null) {
+        finished = status.optBoolean("finished");
+        itemCount = status.optInt("itemCount");
+      }
+    }
+    catch (JSONException ex) {
+      throw PackageManagerHttpActionException.forJSONException(packageManagerInstallStatusURL, jsonString, ex);
     }
 
     return new PackageManagerInstallStatus(finished, itemCount);
