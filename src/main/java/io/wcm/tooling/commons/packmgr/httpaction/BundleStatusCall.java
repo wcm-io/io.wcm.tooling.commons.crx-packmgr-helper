@@ -29,6 +29,7 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.protocol.HttpClientContext;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.util.EntityUtils;
+import org.json.JSONException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -80,8 +81,13 @@ public final class BundleStatusCall implements HttpCall<BundleStatus> {
   }
 
   private BundleStatus toBundleStatus(String jsonString) {
-    BundleStatusParser parser = new BundleStatusParser(bundleStatusWhitelistBundleNames);
-    return parser.parse(jsonString);
+    try {
+      BundleStatusParser parser = new BundleStatusParser(bundleStatusWhitelistBundleNames);
+      return parser.parse(jsonString);
+    }
+    catch (JSONException ex) {
+      throw PackageManagerHttpActionException.forJSONException(bundleStatusURL, jsonString, ex);
+    }
   }
 
 }
