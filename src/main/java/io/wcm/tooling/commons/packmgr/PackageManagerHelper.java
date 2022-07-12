@@ -26,6 +26,7 @@ import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.regex.Pattern;
 
 import javax.net.ssl.SSLContext;
@@ -86,6 +87,7 @@ public final class PackageManagerHelper {
 
   private static final String HTTP_CONTEXT_ATTRIBUTE_PREEMPTIVE_AUTHENTICATION_CREDS = PackageManagerHelper.class.getName() + "_PreemptiveAuthenticationCreds";
   private static final String HTTP_CONTEXT_ATTRIBUTE_OAUTH2_ACCESS_TOKEN = PackageManagerHelper.class.getName() + "_oauth2AccessToken";
+  private static final int STATUS_CHECK_WAIT_INTERVAL_SEC = 3;
 
   private final PackageManagerProperties props;
 
@@ -254,12 +256,7 @@ public final class PackageManagerHelper {
         msg.append("...");
         log.warn(msg.toString());
         if (props.getRetryDelaySec() > 0) {
-          try {
-            Thread.sleep(props.getRetryDelaySec() * DateUtils.MILLIS_PER_SECOND);
-          }
-          catch (InterruptedException ex1) {
-            // ignore
-          }
+          sleep(props.getRetryDelaySec());
         }
         return executeHttpCallWithRetry(call, runCount + 1);
       }
@@ -340,8 +337,7 @@ public final class PackageManagerHelper {
       return;
     }
 
-    final int WAIT_INTERVAL_SEC = 3;
-    final long CHECK_RETRY_COUNT = props.getBundleStatusWaitLimitSec() / WAIT_INTERVAL_SEC;
+    final long CHECK_RETRY_COUNT = props.getBundleStatusWaitLimitSec() / STATUS_CHECK_WAIT_INTERVAL_SEC;
 
     log.info("Check bundle activation status...");
     for (int i = 1; i <= CHECK_RETRY_COUNT; i++) {
@@ -354,8 +350,8 @@ public final class PackageManagerHelper {
       // check if bundles are still stopping/staring
       if (!bundleStatus.isAllBundlesRunning()) {
         log.info("Bundles starting/stopping: {} - wait {} sec (max. {} sec) ...",
-            bundleStatus.getStatusLineCompact(), WAIT_INTERVAL_SEC, props.getBundleStatusWaitLimitSec());
-        sleep(WAIT_INTERVAL_SEC);
+            bundleStatus.getStatusLineCompact(), STATUS_CHECK_WAIT_INTERVAL_SEC, props.getBundleStatusWaitLimitSec());
+        sleep(STATUS_CHECK_WAIT_INTERVAL_SEC);
         instanceReady = false;
       }
 
@@ -365,8 +361,8 @@ public final class PackageManagerHelper {
           String bundleSymbolicName = bundleStatus.getMatchingBundle(blacklistBundleNamePattern);
           if (bundleSymbolicName != null) {
             log.info("Bundle '{}' is still deployed - wait {} sec (max. {} sec) ...",
-                bundleSymbolicName, WAIT_INTERVAL_SEC, props.getBundleStatusWaitLimitSec());
-            sleep(WAIT_INTERVAL_SEC);
+                bundleSymbolicName, STATUS_CHECK_WAIT_INTERVAL_SEC, props.getBundleStatusWaitLimitSec());
+            sleep(STATUS_CHECK_WAIT_INTERVAL_SEC);
             instanceReady = false;
             break;
           }
@@ -392,8 +388,7 @@ public final class PackageManagerHelper {
       return;
     }
 
-    final int WAIT_INTERVAL_SEC = 3;
-    final long CHECK_RETRY_COUNT = props.getPackageManagerInstallStatusWaitLimitSec() / WAIT_INTERVAL_SEC;
+    final long CHECK_RETRY_COUNT = props.getPackageManagerInstallStatusWaitLimitSec() / STATUS_CHECK_WAIT_INTERVAL_SEC;
 
     log.info("Check package manager installation status...");
     for (int i = 1; i <= CHECK_RETRY_COUNT; i++) {
@@ -406,8 +401,8 @@ public final class PackageManagerHelper {
       // check if package manager is still installing packages
       if (!packageManagerStatus.isFinished()) {
         log.info("Packager manager not ready: {} packages left for installation - wait {} sec (max. {} sec) ...",
-            packageManagerStatus.getItemCount(), WAIT_INTERVAL_SEC, props.getPackageManagerInstallStatusWaitLimitSec());
-        sleep(WAIT_INTERVAL_SEC);
+            packageManagerStatus.getItemCount(), STATUS_CHECK_WAIT_INTERVAL_SEC, props.getPackageManagerInstallStatusWaitLimitSec());
+        sleep(STATUS_CHECK_WAIT_INTERVAL_SEC);
         instanceReady = false;
       }
 
@@ -418,12 +413,35 @@ public final class PackageManagerHelper {
     }
   }
 
+  /**
+   * Wait for bundles to become active and for package manager install status to become finished (in parallel).
+   * @param httpClient HTTP client
+   * @param packageManagerHttpClientContext HTTP client context for package manager
+   * @param consoleHttpClientContext HTTP client context for console
+   */
+  public void waitForBundlesActivationAndPackageManagerInstallStatusFinished(CloseableHttpClient httpClient,
+      HttpClientContext packageManagerHttpClientContext, HttpClientContext consoleHttpClientContext) {
+    CompletableFuture<Void> combined = CompletableFuture.allOf(
+        CompletableFuture.supplyAsync(() -> {
+          waitForPackageManagerInstallStatusFinished(httpClient, packageManagerHttpClientContext);
+          return true;
+        }),
+        CompletableFuture.supplyAsync(() -> {
+          sleep(1); // start with a bit offset to the other call
+          waitForBundlesActivation(httpClient, consoleHttpClientContext);
+          return true;
+        }));
+    // wait for completion of both checks
+    combined.join();
+  }
+
   private void sleep(int sec) {
     try {
       Thread.sleep(sec * DateUtils.MILLIS_PER_SECOND);
     }
     catch (InterruptedException e) {
-      // ignore
+      // propagate thread interruption
+      Thread.currentThread().interrupt();
     }
   }
 

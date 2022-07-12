@@ -131,10 +131,9 @@ public class CrxPackageInstaller implements VendorPackageInstaller {
         // delay further processing after install (if activated)
         delay(packageFile.getDelayAfterInstallSec());
 
-        // after install: if bundles are still stopping/starting, wait for completion
-        pkgmgr.waitForBundlesActivation(httpClient, consoleHttpClientContext);
-        // after install: if packages are still installing, wait for completion
-        pkgmgr.waitForPackageManagerInstallStatusFinished(httpClient, packageManagerHttpClientContext);
+        // after install: if bundles are still stopping/starting or packages are still installing, wait for completion
+        pkgmgr.waitForBundlesActivationAndPackageManagerInstallStatusFinished(httpClient,
+            packageManagerHttpClientContext, consoleHttpClientContext);
       }
       else {
         log.info("Package uploaded successfully to {} (without installing).", path);
