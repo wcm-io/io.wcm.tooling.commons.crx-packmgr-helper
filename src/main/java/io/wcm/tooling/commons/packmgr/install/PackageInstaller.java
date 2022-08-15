@@ -100,10 +100,10 @@ public final class PackageInstaller {
       throw new PackageManagerException("File does not exist: " + file.getAbsolutePath());
     }
 
-    // before install: if packages are still installing, wait for completion
-    pkgmgr.waitForPackageManagerInstallStatusFinished(httpClient, packageManagerHttpClientContext);
     // before install: if bundles are still stopping/starting, wait for completion
     pkgmgr.waitForBundlesActivation(httpClient, consoleHttpClientContext);
+    // before install: if packages are still installing, wait for completion
+    pkgmgr.waitForPackageManagerInstallStatusFinished(httpClient, packageManagerHttpClientContext);
 
     if (packageFile.isInstall()) {
       log.info("Upload and install {}{} to {}", packageFile.isForce() ? "(force) " : "", file.getName(), props.getPackageManagerUrl());

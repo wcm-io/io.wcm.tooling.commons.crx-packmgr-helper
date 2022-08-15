@@ -2,7 +2,7 @@
 
 Java Library for uploading and downloading AEM content packages via CRX Package Manager.
 
-[![Maven Central](https://maven-badges.herokuapp.com/maven-central/io.wcm.tooling.commons/io.wcm.tooling.commons.crx-packmgr-helper/badge.svg)](https://maven-badges.herokuapp.com/maven-central/io.wcm.tooling.commons/io.wcm.tooling.commons.crx-packmgr-helper)
+[![Maven Central](https://img.shields.io/maven-central/v/io.wcm.tooling.commons/io.wcm.tooling.commons.crx-packmgr-helper)](https://repo1.maven.org/maven2/io/wcm/tooling/commons/io.wcm.tooling.commons.crx-packmgr-helper)
 
 ### Documentation
 
