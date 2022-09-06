@@ -334,7 +334,9 @@ public final class ContentUnpacker {
 
     String jcrPrimaryType = element.getAttributeValue("primaryType", JCR_NAMESPACE);
     boolean isRepositoryUserGroup = StringUtils.equals(jcrPrimaryType, "rep:User") || StringUtils.equals(jcrPrimaryType, "rep:Group");
-    boolean isReplicationElement = StringUtils.equals(jcrPrimaryType, "cq:Page") || StringUtils.equals(jcrPrimaryType, "cq:Template");
+    boolean isReplicationElement = StringUtils.equals(jcrPrimaryType, "cq:Page")
+        || StringUtils.equals(jcrPrimaryType, "dam:Asset")
+        || StringUtils.equals(jcrPrimaryType, "cq:Template");
     boolean isContent = insideReplicationElement && StringUtils.equals(element.getQualifiedName(), "jcr:content");
     boolean setReplicationAttributes = isContent && markReplicationActivated;
 
@@ -382,6 +384,7 @@ public final class ContentUnpacker {
       addMixin(element, "cq:ReplicationStatus");
       element.setAttribute("lastReplicated", "{Date}" + dateLastReplicated, CQ_NAMESPACE);
       element.setAttribute("lastReplicationAction", "Activate", CQ_NAMESPACE);
+      collectNamespacePrefix(namespacePrefixesActuallyUsed, CQ_NAMESPACE.getPrefix());
     }
 
     List<Element> children = new ArrayList<>(element.getChildren());
