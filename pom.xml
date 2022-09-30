@@ -30,7 +30,7 @@
 
   <groupId>io.wcm.tooling.commons</groupId>
   <artifactId>io.wcm.tooling.commons.crx-packmgr-helper</artifactId>
-  <version>2.1.5-SNAPSHOT</version>
+  <version>2.1.6</version>
   <packaging>jar</packaging>
 
   <name>CRX Package Manager Helper</name>
@@ -48,7 +48,7 @@
     <site.url.module.prefix>tooling/commons/crx-packmgr-helper</site.url.module.prefix>
 
     <!-- Enable reproducible builds -->
-    <project.build.outputTimestamp>2022-08-15T10:55:46Z</project.build.outputTimestamp>
+    <project.build.outputTimestamp>2022-09-30T07:51:31Z</project.build.outputTimestamp>
   </properties>
 
   <dependencies>
