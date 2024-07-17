@@ -53,7 +53,7 @@ public final class BundleStatus {
    * @return Status Line from JSON string
    * @deprecated Please use {@link #getStatusLineCompact()}
    */
-  @Deprecated
+  @Deprecated(since = "1.6.0")
   public String getStatusLine() {
     return this.statusLine;
   }

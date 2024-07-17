@@ -53,7 +53,7 @@ class ContentUnpackerTest {
   private ContentUnpacker underTest;
 
   @BeforeEach
-  void setUp() throws Exception {
+  void setUp() {
     props = new ContentUnpackerProperties();
     props.setExcludeFiles(EXCLUDE_FILES);
     props.setExcludeNodes(EXCLUDE_NODES);
@@ -61,7 +61,7 @@ class ContentUnpackerTest {
   }
 
   @Test
-  void testUnpack() throws Exception {
+  void testUnpack() {
     File contentPackage = new File("src/test/resources/content-package-test.zip");
     File outputDirectory = new File("target/unpacktest");
     outputDirectory.mkdirs();
@@ -74,7 +74,7 @@ class ContentUnpackerTest {
   }
 
   @Test
-  void testUnpack_MarkReplicationActivated() throws Exception {
+  void testUnpack_MarkReplicationActivated() {
     File contentPackage = new File("src/test/resources/content-package-test.zip");
     File outputDirectory = new File("target/unpacktest-MarkReplicationActivated");
     outputDirectory.mkdirs();
@@ -94,7 +94,7 @@ class ContentUnpackerTest {
   }
 
   @Test
-  void testUnpack_MarkReplicationActivated_IncludeNodes() throws Exception {
+  void testUnpack_MarkReplicationActivated_IncludeNodes() {
     File contentPackage = new File("src/test/resources/content-package-test.zip");
     File outputDirectory = new File("target/unpacktest-MarkReplicationActivated_IncludeNodes");
     outputDirectory.mkdirs();
