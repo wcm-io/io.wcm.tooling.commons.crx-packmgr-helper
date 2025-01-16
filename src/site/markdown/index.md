@@ -7,7 +7,7 @@ Java Library for uploading and downloading AEM content packages via CRX Package 
 ### Documentation
 
 * [API documentation](apidocs/)
-* [Changelog](changes-report.html)
+* [Changelog](changes.html)
 
 
 ### Overview
