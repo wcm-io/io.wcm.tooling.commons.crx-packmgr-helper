@@ -114,17 +114,20 @@ public final class PackageDownloader implements Closeable {
   public File downloadContentPackage(String packagePath, String ouputFilePath, boolean rebuildPackage) {
     try {
       HttpClientContext httpClientContext = pkgmgr.getPackageManagerHttpClientContext();
+      String packageManagerUrl = props.getPackageManagerUrl();
+      VendorPackageDownloader downloader = VendorInstallerFactory.getPackageDownloader(packageManagerUrl);
 
       // (Re-)build package
       if (rebuildPackage) {
         log.info("Rebuilding package {} ...", packagePath);
-        HttpPost buildMethod = new HttpPost(props.getPackageManagerUrl() + "/console.html" + packagePath + "?cmd=build");
+        HttpPost buildMethod = downloader.createRebuildMethod(packagePath, packageManagerUrl);
         pkgmgr.executePackageManagerMethodHtmlOutputResponse(httpClient, httpClientContext, buildMethod);
       }
 
       // Download package
-      log.info("Downloading package {} from {} ...", packagePath, props.getPackageManagerUrl());
-      String baseUrl = VendorInstallerFactory.getBaseUrl(props.getPackageManagerUrl());
+      String baseUrl = downloader.downloadBaseUrl(packageManagerUrl);
+      log.info("Downloading package {} from {} ...", packagePath, baseUrl);
+      
       HttpGet downloadMethod = new HttpGet(baseUrl + packagePath);
 
       // execute download
