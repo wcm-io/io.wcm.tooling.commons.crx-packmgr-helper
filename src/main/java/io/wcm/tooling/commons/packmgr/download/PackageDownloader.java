@@ -125,7 +125,7 @@ public final class PackageDownloader implements Closeable {
       }
 
       // Download package
-      String baseUrl = downloader.downloadBaseUrl(packageManagerUrl);
+      String baseUrl = downloader.createDownloadZipBaseUrl(packageManagerUrl);
       log.info("Downloading package {} from {} ...", packagePath, baseUrl);
       
       HttpGet downloadMethod = new HttpGet(baseUrl + packagePath);

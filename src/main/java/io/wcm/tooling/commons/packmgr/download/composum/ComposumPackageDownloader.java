@@ -38,7 +38,7 @@ public class ComposumPackageDownloader implements VendorPackageDownloader {
   }
   
   @Override
-  public String downloadBaseUrl(String packageManagerUrl) {
+  public String createDownloadZipBaseUrl(String packageManagerUrl) {
     return packageManagerUrl + "package.download.zip";
   }
   

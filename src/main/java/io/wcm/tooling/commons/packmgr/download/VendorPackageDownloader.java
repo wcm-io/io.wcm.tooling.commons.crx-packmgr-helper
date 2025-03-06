@@ -31,10 +31,10 @@ public interface VendorPackageDownloader {
   HttpPost createRebuildMethod(String packagePath, String packageManagerUrl);
   
   /**
-   * Install a Package
+   * Base URL of the zip-downloads, without the actual contentPackagePath
    * @param packageManagerUrl URL of he manager service
    * @return Http-Post to call
    */
-  String downloadBaseUrl(String packageManagerUrl);
+  String createDownloadZipBaseUrl(String packageManagerUrl);
 
 }

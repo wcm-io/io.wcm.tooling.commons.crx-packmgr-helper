@@ -30,7 +30,7 @@ public class CrxPackageDownloader implements VendorPackageDownloader {
   }
 
   @Override
-  public String downloadBaseUrl(String packageManagerUrl) {
+  public String createDownloadZipBaseUrl(String packageManagerUrl) {
     return VendorInstallerFactory.getBaseUrl(packageManagerUrl);
   }
   
