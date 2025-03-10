@@ -51,6 +51,7 @@ class OneAttributePerLineXmlProcessor extends AbstractXMLOutputProcessor {
 
   /**
    * This will handle printing of an {@link Element}.
+   *
    * <p>
    * This method arranges for outputting the Element infrastructure including
    * Namespace Declarations and Attributes.

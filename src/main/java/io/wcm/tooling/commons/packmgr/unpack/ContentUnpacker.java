@@ -323,6 +323,7 @@ public final class ContentUnpacker {
     return path.toString();
   }
 
+  @SuppressWarnings("PMD.EmptyControlStatement")
   private void applyXmlExcludes(Element element, String parentPath, Set<String> namespacePrefixesActuallyUsed,
       boolean insideReplicationElement) {
     String path = buildElementPath(element, parentPath);
