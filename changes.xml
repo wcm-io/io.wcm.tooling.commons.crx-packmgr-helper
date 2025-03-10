@@ -25,6 +25,9 @@
   <body>
 
     <release version="2.2.0" date="not released">
+      <action type="update" dev="sseifert" issue="2">
+        Content Unpacker: Use FileVault DocViewFormat class to format downloaded DocView files instead of our own formatting implementation.
+      </action>
       <action type="update" dev="sseifert" issue="5">
         Content Unpacker: Use FileVault 3.8.2 and switch to DocViewProperty2.
       </action>
