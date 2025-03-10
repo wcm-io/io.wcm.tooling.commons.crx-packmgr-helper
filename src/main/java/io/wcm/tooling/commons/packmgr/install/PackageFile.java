@@ -22,6 +22,7 @@ package io.wcm.tooling.commons.packmgr.install;
 import java.io.File;
 import java.io.IOException;
 import java.util.Map;
+import java.util.Objects;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -72,7 +73,7 @@ public final class PackageFile {
   public void setDelayAfterInstallSecAutoDetect() {
     try {
       Map<String, Object> props = ContentPackageProperties.get(file);
-      String packageType = StringUtils.defaultString((String)props.get("packageType"), "content");
+      String packageType = Objects.toString(props.get("packageType"), "content");
       if (StringUtils.equals(packageType, "container") || StringUtils.equals(packageType, "mixed")) {
         this.delayAfterInstallSec = DEFAULT_DELAY_AFTER_CONTAINER_PACKAGE_SEC;
       }

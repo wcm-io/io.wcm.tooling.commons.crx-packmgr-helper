@@ -175,7 +175,7 @@ public final class ContentUnpacker {
    * @param outputDirectory Output directory
    */
   public void unpack(File file, File outputDirectory) {
-    try (ZipFile zipFile = new ZipFile(file)) {
+    try (ZipFile zipFile = new ZipFile.Builder().setFile(file).get()) {
       Enumeration<ZipArchiveEntry> entries = zipFile.getEntries();
       while (entries.hasMoreElements()) {
         ZipArchiveEntry entry = entries.nextElement();

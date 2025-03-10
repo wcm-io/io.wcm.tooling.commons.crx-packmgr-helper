@@ -21,6 +21,7 @@ package io.wcm.tooling.commons.packmgr;
 
 import java.io.IOException;
 import java.net.SocketTimeoutException;
+import java.util.Objects;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.StatusLine;
@@ -56,7 +57,7 @@ public final class PackageManagerHttpActionException extends RuntimeException {
   @SuppressWarnings("PMD.UseStringBufferForStringAppends")
   public static PackageManagerHttpActionException forIOException(String url, IOException ex) {
     String message = "HTTP call to " + url + " failed: "
-        + StringUtils.defaultString(ex.getMessage(), ex.getClass().getSimpleName());
+        + Objects.toString(ex.getMessage(), ex.getClass().getSimpleName());
     if (ex instanceof SocketTimeoutException) {
       message += " (consider to increase the socket timeout using -Dvault.httpSocketTimeoutSec)";
     }

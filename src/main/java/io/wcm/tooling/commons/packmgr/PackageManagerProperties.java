@@ -21,10 +21,9 @@ package io.wcm.tooling.commons.packmgr;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-
-import org.apache.commons.lang3.StringUtils;
 
 /**
  * Configuration properties for {@link PackageManagerHelper}.
@@ -111,7 +110,7 @@ public final class PackageManagerProperties {
    * @return User ID
    */
   public String getConsoleUserId() {
-    return StringUtils.defaultString(this.consoleUserId, this.userId);
+    return Objects.toString(this.consoleUserId, this.userId);
   }
 
   public void setConsoleUserId(String consoleUserId) {
@@ -124,7 +123,7 @@ public final class PackageManagerProperties {
    * @return Password
    */
   public String getConsolePassword() {
-    return StringUtils.defaultString(this.consolePassword, this.password);
+    return Objects.toString(this.consolePassword, this.password);
   }
 
   public void setConsolePassword(String consolePassword) {
@@ -138,7 +137,7 @@ public final class PackageManagerProperties {
    * @return OAuth 2 access token.
    */
   public String getConsoleOAuth2AccessToken() {
-    return StringUtils.defaultString(this.consoleOauth2AccessToken, this.oauth2AccessToken);
+    return Objects.toString(this.consoleOauth2AccessToken, this.oauth2AccessToken);
   }
 
 
