@@ -24,7 +24,10 @@
     xsi:schemaLocation="http://maven.apache.org/changes/2.0.0 https://maven.apache.org/xsd/changes-2.0.0.xsd">
   <body>
 
-    <release version="2.1.8" date="not released">
+    <release version="2.2.0" date="not released">
+      <action type="update" dev="sseifert">
+        ContentUnpacker: Use FileVault 3.8.2 and switch to DocViewProperty2.
+      </action>
       <action type="update" dev="sseifert">
         Switch to Java 11 as minimum version.
       </action>
