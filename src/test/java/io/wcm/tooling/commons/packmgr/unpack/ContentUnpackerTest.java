@@ -72,6 +72,9 @@ class ContentUnpackerTest {
 
     assertXpathExists("/jcr:root",
         new File(outputDirectory, "jcr_root/content/adaptto/sample/en/.content.xml"));
+
+    assertXpathEvaluatesTo("{Name}[crx:replicate,jcr:write]", "/jcr:root/allow/@rep:privileges",
+        new File(outputDirectory, "jcr_root/content/adaptto/sample/en/_rep_policy.xml"));
   }
 
   @Test

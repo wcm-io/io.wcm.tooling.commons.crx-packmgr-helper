@@ -356,11 +356,11 @@ public final class ContentUnpacker {
       else if (StringUtils.startsWith(attribute.getValue(), "{Name}")) {
         collectNamespacePrefixNameArray(namespacePrefixesActuallyUsed, attribute.getValue());
         // alphabetically sort name values
-        attribute.setValue(sortReferenceValues(attribute.getQualifiedName(), attribute.getValue(), PropertyType.NAME));
+        attribute.setValue(sortReferenceValues(attribute.getValue(), PropertyType.NAME));
       }
       else if (StringUtils.startsWith(attribute.getValue(), "{WeakReference}")) {
         // alphabetically sort weak reference values
-        attribute.setValue(sortReferenceValues(attribute.getQualifiedName(), attribute.getValue(), PropertyType.WEAKREFERENCE));
+        attribute.setValue(sortReferenceValues(attribute.getValue(), PropertyType.WEAKREFERENCE));
       }
       if (!excluded) {
         collectNamespacePrefix(namespacePrefixesActuallyUsed, attribute.getNamespacePrefix());
@@ -439,17 +439,16 @@ public final class ContentUnpacker {
 
   /**
    * Sort weak reference values alphabetically to ensure consistent ordering.
-   * @param name Property name
    * @param value Property value
    * @param propertyType Property type from {@link PropertyType}
    * @return Property value with sorted references
    */
-  private String sortReferenceValues(String name, String value, int propertyType) {
+  private String sortReferenceValues(String value, int propertyType) {
     Set<String> refs = new TreeSet<>();
     for (String item : DocViewUtil.parseValues(value)) {
       refs.add(item);
     }
-    return DocViewUtil.formatValues(new ArrayList<>(refs));
+    return DocViewUtil.formatValues(new ArrayList<>(refs), propertyType);
   }
 
 }
