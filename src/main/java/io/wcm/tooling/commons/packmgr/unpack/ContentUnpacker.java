@@ -54,6 +54,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.jackrabbit.JcrConstants;
 import org.apache.jackrabbit.util.ISO8601;
+import org.apache.jackrabbit.vault.fs.io.DocViewFormat;
 import org.apache.jackrabbit.vault.util.PlatformNameFormat;
 import org.jdom2.Attribute;
 import org.jdom2.Document;
@@ -87,6 +88,8 @@ public final class ContentUnpacker {
     SAX_PARSER_FACTORY = SAXParserFactory.newInstance();
     SAX_PARSER_FACTORY.setNamespaceAware(true);
   }
+
+  private static final DocViewFormat DOCVIEWFORMAT = new DocViewFormat();
 
   private final Pattern[] excludeFiles;
   private final Pattern[] excludeNodes;
@@ -153,7 +156,11 @@ public final class ContentUnpacker {
     if (this.excludeNodes.length == 0 && this.excludeProperties.length == 0) {
       return false;
     }
-    return StringUtils.endsWith(name, ".xml");
+    return isXmlFile(name);
+  }
+
+  private boolean isXmlFile(String name) {
+    return StringUtils.equalsIgnoreCase(FilenameUtils.getExtension(name), "xml");
   }
 
   /**
@@ -209,6 +216,15 @@ public final class ContentUnpacker {
           else {
             // write file directly without XML filtering
             IOUtils.copy(entryStream, fos);
+          }
+        }
+        if (isXmlFile(outputFile.getName())) {
+          // format output file using DocView format
+          try {
+            DOCVIEWFORMAT.format(outputFile, false);
+          }
+          catch (IOException ex) {
+            throw new IOException("Unable to apply DocView format to file: " + outputFile.getAbsolutePath(), ex);
           }
         }
       }
@@ -278,7 +294,7 @@ public final class ContentUnpacker {
     XMLOutputter outputter = new XMLOutputter(Format.getPrettyFormat()
         .setIndent("    ")
         .setLineSeparator(LineSeparator.UNIX));
-    outputter.setXMLOutputProcessor(new OneAttributePerLineXmlProcessor(namespacePrefixes, namespacePrefixesActuallyUsed));
+    outputter.setXMLOutputProcessor(new NamspaceOrderedXmlProcessor(namespacePrefixes, namespacePrefixesActuallyUsed));
     outputter.output(doc, outputStream);
     outputStream.flush();
   }
