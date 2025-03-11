@@ -55,18 +55,28 @@ final class DocViewUtil {
 
   /**
    * Formats multiple values on DocView as a single string.
-   * @param stringValues Values
+   * @param values Values
    * @return DocView values string
    */
-  static String formatValues(List<String> stringValues) {
-    Value[] values = stringValues.stream()
-        .map(value -> new MockValue(value, PropertyType.STRING))
+  static String formatValues(List<String> values) {
+    return formatValues(values, PropertyType.STRING);
+  }
+
+  /**
+   * Formats multiple values on DocView as a single string.
+   * @param values Values
+   * @param propertyType Property type from {@link PropertyType}
+   * @return DocView values string
+   */
+  static String formatValues(List<String> values, int propertyType) {
+    Value[] valueObjects = values.stream()
+        .map(value -> new MockValue(value, propertyType))
         .toArray(size -> new Value[size]);
     try {
-      return DocViewProperty2.fromValues(DUMMY_NAME, values, PropertyType.STRING, true, false, false).formatValue();
+      return DocViewProperty2.fromValues(DUMMY_NAME, valueObjects, propertyType, true, false, false).formatValue();
     }
     catch (RepositoryException ex) {
-      throw new IllegalArgumentException("Unable to format values: " + values, ex);
+      throw new IllegalArgumentException("Unable to format values: " + valueObjects, ex);
     }
   }
 
