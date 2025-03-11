@@ -375,6 +375,12 @@ public final class ContentUnpacker {
       collectNamespacePrefix(namespacePrefixesActuallyUsed, CQ_NAMESPACE.getPrefix());
     }
 
+    // if current element is a replication element, but the jcr:content node to set the replication attributes to is missing, add it
+    if (isReplicationElement && element.getChild("content", JCR_NAMESPACE) == null
+        && matches(path + "/jcr:content", markReplicationActivatedIncludeNodes, true)) {
+      element.addContent(new Element("content", JCR_NAMESPACE));
+    }
+
     List<Element> children = new ArrayList<>(element.getChildren());
     for (Element child : children) {
       applyXmlExcludes(child, path, namespacePrefixesActuallyUsed, (insideReplicationElement || isReplicationElement) && !isContent);
