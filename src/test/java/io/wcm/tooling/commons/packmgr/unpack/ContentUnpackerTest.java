@@ -33,6 +33,8 @@ import org.junit.jupiter.api.Test;
 
 class ContentUnpackerTest {
 
+  private static final File CONTENT_PACKAGE_TEST = new File("src/test/resources/unpack/content-package-test.zip");
+
   private static final String[] EXCLUDE_FILES = new String[] {
     ".*/sling-ide-tooling/.*",
     "^META-INF/.*"
@@ -44,7 +46,7 @@ class ContentUnpackerTest {
     "jcr\\:created",
     "jcr\\:createdBy",
     "jcr\\:lastModified",
-    "jcr\\:lastModifiedBy",
+      "jcr\\:lastModifiedBy",
     "cq\\:lastModified",
     "cq\\:lastModifiedBy"
   };
@@ -62,27 +64,28 @@ class ContentUnpackerTest {
 
   @Test
   void testUnpack() {
-    File contentPackage = new File("src/test/resources/content-package-test.zip");
     File outputDirectory = new File("target/unpacktest");
     outputDirectory.mkdirs();
 
     underTest = new ContentUnpacker(props);
-    underTest.unpack(contentPackage, outputDirectory);
+    underTest.unpack(CONTENT_PACKAGE_TEST, outputDirectory);
 
     assertXpathExists("/jcr:root",
         new File(outputDirectory, "jcr_root/content/adaptto/sample/en/.content.xml"));
+
+    assertXpathEvaluatesTo("{Name}[crx:replicate,jcr:write]", "/jcr:root/allow/@rep:privileges",
+        new File(outputDirectory, "jcr_root/content/adaptto/sample/en/_rep_policy.xml"));
   }
 
   @Test
   void testUnpack_MarkReplicationActivated() {
-    File contentPackage = new File("src/test/resources/content-package-test.zip");
     File outputDirectory = new File("target/unpacktest-MarkReplicationActivated");
     outputDirectory.mkdirs();
 
     props.setMarkReplicationActivated(true);
 
     underTest = new ContentUnpacker(props);
-    underTest.unpack(contentPackage, outputDirectory);
+    underTest.unpack(CONTENT_PACKAGE_TEST, outputDirectory);
 
     assertNoReplicationAction(outputDirectory, "jcr_root/.content.xml");
     assertNoReplicationAction(outputDirectory, "jcr_root/content/.content.xml");
@@ -95,7 +98,6 @@ class ContentUnpackerTest {
 
   @Test
   void testUnpack_MarkReplicationActivated_IncludeNodes() {
-    File contentPackage = new File("src/test/resources/content-package-test.zip");
     File outputDirectory = new File("target/unpacktest-MarkReplicationActivated_IncludeNodes");
     outputDirectory.mkdirs();
 
@@ -106,7 +108,7 @@ class ContentUnpackerTest {
     });
 
     underTest = new ContentUnpacker(props);
-    underTest.unpack(contentPackage, outputDirectory);
+    underTest.unpack(CONTENT_PACKAGE_TEST, outputDirectory);
 
     assertNoReplicationAction(outputDirectory, "jcr_root/.content.xml");
     assertNoReplicationAction(outputDirectory, "jcr_root/content/.content.xml");
