@@ -2,7 +2,7 @@
  * #%L
  * wcm.io
  * %%
- * Copyright (C) 2014 wcm.io
+ * Copyright (C) 2025 wcm.io
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,14 +37,14 @@ import org.jdom2.output.support.Walker;
 import org.jdom2.util.NamespaceStack;
 
 /**
- * XML output processor that renders one attribute per line for easier diff-ing on content changes.
+ * XML output processor that prints namespaces in the exact given order.
  */
-class OneAttributePerLineXmlProcessor extends AbstractXMLOutputProcessor {
+class NamspaceOrderedXmlProcessor extends AbstractXMLOutputProcessor {
 
   private final Set<String> namespacePrefixes;
   private final Set<String> namespacePrefixesActuallyUsed;
 
-  OneAttributePerLineXmlProcessor(Set<String> namespacePrefixes, Set<String> namespacePrefixesActuallyUsed) {
+  NamspaceOrderedXmlProcessor(Set<String> namespacePrefixes, Set<String> namespacePrefixesActuallyUsed) {
     this.namespacePrefixes = namespacePrefixes;
     this.namespacePrefixesActuallyUsed = namespacePrefixesActuallyUsed;
   }
@@ -106,10 +106,8 @@ class OneAttributePerLineXmlProcessor extends AbstractXMLOutputProcessor {
 
       // Print out attributes
       if (element.hasAttributes()) {
-        boolean printMultiLine = element.getAttributes().size() > 1
-            || nstack.addedForward().iterator().hasNext();
         for (final Attribute attribute : element.getAttributes()) {
-          printAttribute(out, fstack, attribute, printMultiLine);
+          printAttribute(out, fstack, attribute);
         }
       }
 
@@ -121,7 +119,7 @@ class OneAttributePerLineXmlProcessor extends AbstractXMLOutputProcessor {
           write(out, ">");
         }
         else {
-          write(out, "/>");
+          write(out, " />");
         }
         // nothing more to do.
         return;
@@ -153,7 +151,7 @@ class OneAttributePerLineXmlProcessor extends AbstractXMLOutputProcessor {
             write(out, ">");
           }
           else {
-            write(out, "/>");
+            write(out, " />");
           }
           // nothing more to do.
           return;
@@ -184,28 +182,6 @@ class OneAttributePerLineXmlProcessor extends AbstractXMLOutputProcessor {
       nstack.pop();
     }
 
-  }
-
-  private void printAttribute(Writer out, FormatStack fstack, Attribute attribute, boolean printMultiLine) throws IOException {
-    if (!attribute.isSpecified() && fstack.isSpecifiedAttributesOnly()) {
-      return;
-    }
-
-    if (printMultiLine) {
-      write(out, StringUtils.defaultString(fstack.getLineSeparator()));
-      write(out, StringUtils.defaultString(fstack.getLevelIndent()));
-      write(out, StringUtils.defaultString(fstack.getIndent()));
-    }
-    else {
-      write(out, " ");
-    }
-
-    write(out, attribute.getQualifiedName());
-    write(out, "=");
-
-    write(out, "\"");
-    attributeEscapedEntitiesFilter(out, fstack, attribute.getValue());
-    write(out, "\"");
   }
 
 }

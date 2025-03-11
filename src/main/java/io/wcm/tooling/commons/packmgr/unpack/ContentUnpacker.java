@@ -294,7 +294,7 @@ public final class ContentUnpacker {
     XMLOutputter outputter = new XMLOutputter(Format.getPrettyFormat()
         .setIndent("    ")
         .setLineSeparator(LineSeparator.UNIX));
-    outputter.setXMLOutputProcessor(new OneAttributePerLineXmlProcessor(namespacePrefixes, namespacePrefixesActuallyUsed));
+    outputter.setXMLOutputProcessor(new NamspaceOrderedXmlProcessor(namespacePrefixes, namespacePrefixesActuallyUsed));
     outputter.output(doc, outputStream);
     outputStream.flush();
   }
