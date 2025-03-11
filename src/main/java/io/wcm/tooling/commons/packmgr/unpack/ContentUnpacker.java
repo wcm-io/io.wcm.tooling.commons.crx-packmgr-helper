@@ -31,15 +31,19 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Enumeration;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
 import javax.jcr.PropertyType;
 import javax.xml.XMLConstants;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
@@ -61,6 +65,9 @@ import org.jdom2.input.SAXBuilder;
 import org.jdom2.output.Format;
 import org.jdom2.output.LineSeparator;
 import org.jdom2.output.XMLOutputter;
+import org.xml.sax.Attributes;
+import org.xml.sax.SAXException;
+import org.xml.sax.helpers.DefaultHandler;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.wcm.tooling.commons.packmgr.PackageManagerException;
@@ -183,6 +190,11 @@ public final class ContentUnpacker {
       directory.mkdirs();
     }
     else {
+      Set<String> namespacePrefixes = null;
+      if (applyXmlExcludes(entry.getName())) {
+        namespacePrefixes = getNamespacePrefixes(zipFile, entry);
+      }
+
       try (InputStream entryStream = zipFile.getInputStream(entry)) {
         File outputFile = FileUtils.getFile(outputDirectory, entry.getName());
         if (outputFile.exists()) {
@@ -192,10 +204,10 @@ public final class ContentUnpacker {
         directory.mkdirs();
 
         try (FileOutputStream fos = new FileOutputStream(outputFile)) {
-          if (applyXmlExcludes(entry.getName())) {
+          if (applyXmlExcludes(entry.getName()) && namespacePrefixes != null) {
             // write file with XML filtering
             try {
-              writeXmlWithExcludes(entry, entryStream, fos);
+              writeXmlWithExcludes(entry, entryStream, fos, namespacePrefixes);
             }
             catch (JDOMException ex) {
               throw new PackageManagerException("Unable to parse XML file: " + entry.getName(), ex);
@@ -219,7 +231,50 @@ public final class ContentUnpacker {
     }
   }
 
-  private void writeXmlWithExcludes(ZipArchiveEntry entry, InputStream inputStream, OutputStream outputStream)
+  /**
+   * Parses XML file with namespace-aware SAX parser to get defined namespaces prefixes in order of appearance
+   * (to keep the same order when outputting the XML file again).
+   * @param zipFile ZIP file
+   * @param entry ZIP entry
+   * @return Ordered set with namespace prefixes in correct order.
+   *         Returns null if given XML file does not contain FileVault XML content.
+   */
+  private Set<String> getNamespacePrefixes(ZipFile zipFile, ZipArchiveEntry entry) throws IOException {
+    try (InputStream entryStream = zipFile.getInputStream(entry)) {
+      SAXParser parser = SAX_PARSER_FACTORY.newSAXParser();
+      final Set<String> prefixes = new LinkedHashSet<>();
+
+      final AtomicBoolean foundRootElement = new AtomicBoolean(false);
+      DefaultHandler handler = new DefaultHandler() {
+        @Override
+        public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
+          // validate that XML file contains FileVault XML content
+          if (StringUtils.equals(uri, JCR_NAMESPACE.getURI()) && StringUtils.equals(localName, "root")) {
+            foundRootElement.set(true);
+          }
+        }
+        @Override
+        public void startPrefixMapping(String prefix, String uri) throws SAXException {
+          if (StringUtils.isNotBlank(prefix)) {
+            prefixes.add(prefix);
+          }
+        }
+      };
+      parser.parse(entryStream, handler);
+
+      if (!foundRootElement.get()) {
+        return null;
+      }
+      else {
+        return prefixes;
+      }
+    }
+    catch (IOException | SAXException | ParserConfigurationException ex) {
+      throw new IOException("Error parsing " + entry.getName(), ex);
+    }
+  }
+
+  private void writeXmlWithExcludes(ZipArchiveEntry entry, InputStream inputStream, OutputStream outputStream, Set<String> namespacePrefixes)
       throws IOException, JDOMException {
     SAXBuilder saxBuilder = new SAXBuilder();
     saxBuilder.setProperty(XMLConstants.ACCESS_EXTERNAL_DTD, "");
@@ -237,7 +292,9 @@ public final class ContentUnpacker {
     applyXmlExcludes(doc.getRootElement(), getParentPath(entry), namespacePrefixesActuallyUsed, false);
 
     XMLOutputter outputter = new XMLOutputter(Format.getPrettyFormat()
+        .setIndent("    ")
         .setLineSeparator(LineSeparator.UNIX));
+    outputter.setXMLOutputProcessor(new OneAttributePerLineXmlProcessor(namespacePrefixes, namespacePrefixesActuallyUsed));
     outputter.output(doc, outputStream);
     outputStream.flush();
   }
