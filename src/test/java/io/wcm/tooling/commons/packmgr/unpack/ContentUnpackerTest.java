@@ -130,6 +130,8 @@ class ContentUnpackerTest {
   private void assertReplicationActionActivate(File outputDirectory, String filePath) {
     assertXpathEvaluatesTo("Activate", "/jcr:root/jcr:content/@cq:lastReplicationAction",
         new File(outputDirectory, filePath));
+    assertXpathEvaluatesTo("cq:PageContent", "/jcr:root/jcr:content/@jcr:primaryType",
+        new File(outputDirectory, filePath));
   }
 
   private void assertNoReplicationAction(File outputDirectory, String filePath) {

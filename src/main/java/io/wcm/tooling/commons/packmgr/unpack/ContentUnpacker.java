@@ -378,7 +378,10 @@ public final class ContentUnpacker {
     // if current element is a replication element, but the jcr:content node to set the replication attributes to is missing, add it
     if (isReplicationElement && element.getChild("content", JCR_NAMESPACE) == null
         && matches(path + "/jcr:content", markReplicationActivatedIncludeNodes, true)) {
-      element.addContent(new Element("content", JCR_NAMESPACE));
+      Element contentNode = new Element("content", JCR_NAMESPACE);
+      String jcrContentPrimaryType = StringUtils.equals(jcrPrimaryType, "cq:Template") ? "cq:PageContent" : jcrPrimaryType + "Content";
+      contentNode.setAttribute("primaryType", jcrContentPrimaryType, JCR_NAMESPACE);
+      element.addContent(contentNode);
     }
 
     List<Element> children = new ArrayList<>(element.getChildren());
