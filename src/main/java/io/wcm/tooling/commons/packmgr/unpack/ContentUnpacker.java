@@ -156,11 +156,12 @@ public final class ContentUnpacker {
     if (this.excludeNodes.length == 0 && this.excludeProperties.length == 0) {
       return false;
     }
-    return isXmlFile(name);
+    return isJcrContentXmlFile(name);
   }
 
-  private boolean isXmlFile(String name) {
-    return StringUtils.equalsIgnoreCase(FilenameUtils.getExtension(name), "xml");
+  private boolean isJcrContentXmlFile(String name) {
+    return StringUtils.equalsIgnoreCase(FilenameUtils.getExtension(name), "xml")
+        && StringUtils.startsWith(name, "jcr_root/");
   }
 
   /**
@@ -218,7 +219,7 @@ public final class ContentUnpacker {
             IOUtils.copy(entryStream, fos);
           }
         }
-        if (isXmlFile(outputFile.getName())) {
+        if (isJcrContentXmlFile(entry.getName())) {
           // format output file using DocView format
           try {
             DOCVIEWFORMAT.format(outputFile, false);
