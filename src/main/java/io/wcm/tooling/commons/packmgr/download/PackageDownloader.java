@@ -19,8 +19,6 @@
  */
 package io.wcm.tooling.commons.packmgr.download;
 
-import static io.wcm.tooling.commons.packmgr.PackageManagerHelper.CRX_PACKAGE_EXISTS_ERROR_MESSAGE_PREFIX;
-
 import java.io.Closeable;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -28,16 +26,13 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.protocol.HttpClientContext;
-import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.util.EntityUtils;
-import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -73,32 +68,16 @@ public final class PackageDownloader implements Closeable {
    * @return Package path
    */
   public String uploadPackageDefinition(File file) {
-    HttpClientContext httpClientContext = pkgmgr.getPackageManagerHttpClientContext();
 
     if (!file.exists()) {
       throw new PackageManagerException("File not found: " + file.getAbsolutePath());
     }
+    String packageManagerUrl = props.getPackageManagerUrl();
 
     // try upload to get path of package - or otherwise make sure package def exists (no install!)
-    log.info("Upload package definition for {} to {} ...", file.getName(), props.getPackageManagerUrl());
-    HttpPost post = new HttpPost(props.getPackageManagerUrl() + "/.json?cmd=upload");
-    MultipartEntityBuilder entity = MultipartEntityBuilder.create()
-        .addBinaryBody("package", file)
-        .addTextBody("force", "true");
-    post.setEntity(entity.build());
-    JSONObject jsonResponse = pkgmgr.executePackageManagerMethodJson(httpClient, httpClientContext, post);
-    boolean success = jsonResponse.optBoolean("success", false);
-    String msg = jsonResponse.optString("msg", null);
-    String packagePath = jsonResponse.optString("path", null);
-    // package already exists - get path from error message and continue
-    if (!success && StringUtils.startsWith(msg, CRX_PACKAGE_EXISTS_ERROR_MESSAGE_PREFIX) && StringUtils.isEmpty(packagePath)) {
-      packagePath = StringUtils.substringAfter(msg, CRX_PACKAGE_EXISTS_ERROR_MESSAGE_PREFIX);
-      success = true;
-    }
-    if (!success) {
-      throw new PackageManagerException("Package path detection failed: " + msg);
-    }
-
+    log.info("Upload package definition for {} to {} ...", file.getName(), packageManagerUrl);
+    VendorPackageDownloader downloader = VendorInstallerFactory.getPackageDownloader(packageManagerUrl);
+    String packagePath = downloader.uploadPackageDefinition(packageManagerUrl, file, pkgmgr);
     return packagePath;
   }
 
@@ -127,7 +106,7 @@ public final class PackageDownloader implements Closeable {
       // Download package
       String baseUrl = downloader.createDownloadZipBaseUrl(packageManagerUrl);
       log.info("Downloading package {} from {} ...", packagePath, baseUrl);
-      
+
       HttpGet downloadMethod = new HttpGet(baseUrl + packagePath);
 
       // execute download

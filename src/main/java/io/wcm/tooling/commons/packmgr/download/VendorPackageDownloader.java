@@ -15,12 +15,25 @@
  */
 package io.wcm.tooling.commons.packmgr.download;
 
+import java.io.File;
+
 import org.apache.http.client.methods.HttpPost;
+
+import io.wcm.tooling.commons.packmgr.PackageManagerHelper;
 
 /**
  * Interface any Vendor Package Downloader must provide
  */
 public interface VendorPackageDownloader {
+
+  /**
+   * Upload the given local package definition (without actually installing it).
+   * @param packageManagerUrl  URL of he manager service
+   * @param file Package definition file
+   * @param pkgmgr Helper for http connections
+   * @return Package path
+   */
+  String uploadPackageDefinition(String packageManagerUrl, File file, PackageManagerHelper pkgmgr);
 
   /**
    * Http-POST to rebuild a Package
@@ -29,7 +42,7 @@ public interface VendorPackageDownloader {
    * @return Http-Post to call
    */
   HttpPost createRebuildMethod(String packagePath, String packageManagerUrl);
-  
+
   /**
    * Base URL of the zip-downloads, without the actual contentPackagePath
    * @param packageManagerUrl URL of he manager service
