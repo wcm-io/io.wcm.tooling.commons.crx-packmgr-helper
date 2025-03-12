@@ -1,6 +1,9 @@
 /*
- * Copyright 2025 wcm.io.
- *
+ * #%L
+ * wcm.io
+ * %%
+ * Copyright (C) 2025 wcm.io
+ * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,6 +15,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * #L%
  */
 package io.wcm.tooling.commons.packmgr.download.composum;
 
@@ -31,7 +35,7 @@ import io.wcm.tooling.commons.packmgr.download.VendorPackageDownloader;
  * Vendor Downloader for AEM's CRX Package Manager
  */
 public class ComposumPackageDownloader implements VendorPackageDownloader {
-  
+
   private static final Logger log = LoggerFactory.getLogger(ComposumPackageDownloader.class);
 
   @Override
@@ -57,7 +61,7 @@ public class ComposumPackageDownloader implements VendorPackageDownloader {
     }
     return packagePath;
   }
-  
+
 
   @Override
   public HttpPost createRebuildMethod(String packagePath, String packageManagerUrl) {
@@ -77,7 +81,7 @@ public class ComposumPackageDownloader implements VendorPackageDownloader {
     delay(3); // needed when PackageDefinition was upload
     return packageManagerUrl + "package.download.zip";
   }
-  
+
   @SuppressWarnings("PMD.GuardLogStatement")
   private void delay(int seconds) {
     if (seconds > 0) {
@@ -86,7 +90,7 @@ public class ComposumPackageDownloader implements VendorPackageDownloader {
         Thread.sleep(seconds * 1000L);
       }
       catch (InterruptedException ex) {
-        // ignore
+        Thread.currentThread().interrupt();
       }
     }
   }

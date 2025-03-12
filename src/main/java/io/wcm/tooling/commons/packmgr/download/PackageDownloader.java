@@ -77,8 +77,7 @@ public final class PackageDownloader implements Closeable {
     // try upload to get path of package - or otherwise make sure package def exists (no install!)
     log.info("Upload package definition for {} to {} ...", file.getName(), packageManagerUrl);
     VendorPackageDownloader downloader = VendorInstallerFactory.getPackageDownloader(packageManagerUrl);
-    String packagePath = downloader.uploadPackageDefinition(packageManagerUrl, file, pkgmgr);
-    return packagePath;
+    return downloader.uploadPackageDefinition(packageManagerUrl, file, pkgmgr);
   }
 
   /**
