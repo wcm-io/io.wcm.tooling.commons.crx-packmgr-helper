@@ -21,6 +21,8 @@ package io.wcm.tooling.commons.packmgr;
 
 import java.util.StringTokenizer;
 
+import org.apache.commons.lang3.StringUtils;
+
 /**
  * Proxy definition - e.g. for maven proxy settings.
  */
@@ -107,7 +109,7 @@ public final class Proxy {
   }
 
   boolean isNonProxyHost(String givenHost) {
-    if (givenHost != null && nonProxyHosts != null && nonProxyHosts.length() > 0) {
+    if (givenHost != null && !StringUtils.isEmpty(nonProxyHosts)) {
       for (StringTokenizer tokenizer = new StringTokenizer(nonProxyHosts, "|"); tokenizer.hasMoreTokens();) {
         String pattern = tokenizer.nextToken();
         pattern = pattern.replace(".", "\\.").replace("*", ".*");

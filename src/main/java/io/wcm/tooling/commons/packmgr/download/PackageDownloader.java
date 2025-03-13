@@ -110,7 +110,7 @@ public final class PackageDownloader implements Closeable {
 
       // execute download
       CloseableHttpResponse response = httpClient.execute(downloadMethod, httpClientContext);
-      try {
+      try (response) {
         if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
 
           // get response stream
@@ -139,15 +139,7 @@ public final class PackageDownloader implements Closeable {
         }
       }
       finally {
-        if (response != null) {
-          EntityUtils.consumeQuietly(response.getEntity());
-          try {
-            response.close();
-          }
-          catch (IOException ex) {
-            // ignore
-          }
-        }
+        EntityUtils.consumeQuietly(response.getEntity());
       }
     }
     catch (IOException ex) {
