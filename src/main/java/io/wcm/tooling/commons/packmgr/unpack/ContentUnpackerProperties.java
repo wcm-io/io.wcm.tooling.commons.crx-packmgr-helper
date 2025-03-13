@@ -40,6 +40,9 @@ public final class ContentUnpackerProperties {
     return this.excludeFiles;
   }
 
+  /**
+   * @param excludeFiles Exclude files
+   */
   public void setExcludeFiles(String[] excludeFiles) {
     this.excludeFiles = excludeFiles;
   }
@@ -52,6 +55,9 @@ public final class ContentUnpackerProperties {
     return this.excludeNodes;
   }
 
+  /**
+   * @param excludeNodes Exclude nodes
+   */
   public void setExcludeNodes(String[] excludeNodes) {
     this.excludeNodes = excludeNodes;
   }
@@ -64,6 +70,9 @@ public final class ContentUnpackerProperties {
     return this.excludeProperties;
   }
 
+  /**
+   * @param excludeProperties Exclude properties
+   */
   public void setExcludeProperties(String[] excludeProperties) {
     this.excludeProperties = excludeProperties;
   }
@@ -76,6 +85,9 @@ public final class ContentUnpackerProperties {
     return this.excludeMixins;
   }
 
+  /**
+   * @param excludeMixins Exclude mixins
+   */
   public void setExcludeMixins(String[] excludeMixins) {
     this.excludeMixins = excludeMixins;
   }
@@ -88,6 +100,10 @@ public final class ContentUnpackerProperties {
     return this.markReplicationActivated;
   }
 
+  /**
+   *
+   * @param markReplicationActivated Set replication status to "activated" for all cq:Page and cq:Template nodes.
+   */
   public void setMarkReplicationActivated(boolean markReplicationActivated) {
     this.markReplicationActivated = markReplicationActivated;
   }
@@ -100,6 +116,9 @@ public final class ContentUnpackerProperties {
     return this.markReplicationActivatedIncludeNodes;
   }
 
+  /**
+   * @param markReplicationActivatedIncludeNodes Node path filter expressions to apply "activated" status on
+   */
   public void setMarkReplicationActivatedIncludeNodes(String[] markReplicationActivatedIncludeNodes) {
     this.markReplicationActivatedIncludeNodes = markReplicationActivatedIncludeNodes;
   }
@@ -113,6 +132,10 @@ public final class ContentUnpackerProperties {
     return this.dateLastReplicated;
   }
 
+  /**
+   * @param dateLastReplicated Sets a fixed date to be used for the "lastReplicated" property when setting replication
+   *          status to "activated".
+   */
   public void setDateLastReplicated(String dateLastReplicated) {
     this.dateLastReplicated = dateLastReplicated;
   }
