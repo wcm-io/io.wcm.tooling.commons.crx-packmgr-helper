@@ -27,7 +27,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Enumeration;
@@ -41,18 +40,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
-import javax.jcr.Binary;
-import javax.jcr.Item;
-import javax.jcr.ItemVisitor;
-import javax.jcr.Node;
-import javax.jcr.Property;
 import javax.jcr.PropertyType;
-import javax.jcr.RepositoryException;
-import javax.jcr.Session;
-import javax.jcr.Value;
-import javax.jcr.ValueFormatException;
-import javax.jcr.nodetype.NodeType;
-import javax.jcr.nodetype.PropertyDefinition;
 import javax.xml.XMLConstants;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
@@ -66,7 +54,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.jackrabbit.JcrConstants;
 import org.apache.jackrabbit.util.ISO8601;
-import org.apache.jackrabbit.vault.util.DocViewProperty;
+import org.apache.jackrabbit.vault.fs.io.DocViewFormat;
 import org.apache.jackrabbit.vault.util.PlatformNameFormat;
 import org.jdom2.Attribute;
 import org.jdom2.Document;
@@ -100,6 +88,8 @@ public final class ContentUnpacker {
     SAX_PARSER_FACTORY = SAXParserFactory.newInstance();
     SAX_PARSER_FACTORY.setNamespaceAware(true);
   }
+
+  private static final DocViewFormat DOCVIEWFORMAT = new DocViewFormat();
 
   private final Pattern[] excludeFiles;
   private final Pattern[] excludeNodes;
@@ -166,7 +156,12 @@ public final class ContentUnpacker {
     if (this.excludeNodes.length == 0 && this.excludeProperties.length == 0) {
       return false;
     }
-    return StringUtils.endsWith(name, ".xml");
+    return isJcrContentXmlFile(name);
+  }
+
+  private boolean isJcrContentXmlFile(String name) {
+    return StringUtils.equalsIgnoreCase(FilenameUtils.getExtension(name), "xml")
+        && StringUtils.startsWith(name, "jcr_root/");
   }
 
   /**
@@ -175,7 +170,7 @@ public final class ContentUnpacker {
    * @param outputDirectory Output directory
    */
   public void unpack(File file, File outputDirectory) {
-    try (ZipFile zipFile = new ZipFile(file)) {
+    try (ZipFile zipFile = new ZipFile.Builder().setFile(file).get()) {
       Enumeration<ZipArchiveEntry> entries = zipFile.getEntries();
       while (entries.hasMoreElements()) {
         ZipArchiveEntry entry = entries.nextElement();
@@ -222,6 +217,15 @@ public final class ContentUnpacker {
           else {
             // write file directly without XML filtering
             IOUtils.copy(entryStream, fos);
+          }
+        }
+        if (isJcrContentXmlFile(entry.getName())) {
+          // format output file using DocView format
+          try {
+            DOCVIEWFORMAT.format(outputFile, false);
+          }
+          catch (IOException ex) {
+            throw new IOException("Unable to apply DocView format to file: " + outputFile.getAbsolutePath(), ex);
           }
         }
       }
@@ -291,7 +295,7 @@ public final class ContentUnpacker {
     XMLOutputter outputter = new XMLOutputter(Format.getPrettyFormat()
         .setIndent("    ")
         .setLineSeparator(LineSeparator.UNIX));
-    outputter.setXMLOutputProcessor(new OneAttributePerLineXmlProcessor(namespacePrefixes, namespacePrefixesActuallyUsed));
+    outputter.setXMLOutputProcessor(new NamspaceOrderedXmlProcessor(namespacePrefixes, namespacePrefixesActuallyUsed));
     outputter.output(doc, outputStream);
     outputStream.flush();
   }
@@ -323,6 +327,7 @@ public final class ContentUnpacker {
     return path.toString();
   }
 
+  @SuppressWarnings("PMD.EmptyControlStatement")
   private void applyXmlExcludes(Element element, String parentPath, Set<String> namespacePrefixesActuallyUsed,
       boolean insideReplicationElement) {
     String path = buildElementPath(element, parentPath);
@@ -366,13 +371,13 @@ public final class ContentUnpacker {
         }
       }
       else if (StringUtils.startsWith(attribute.getValue(), "{Name}")) {
-        collectNamespacePrefixNameArray(namespacePrefixesActuallyUsed, attribute.getQualifiedName(), attribute.getValue());
+        collectNamespacePrefixNameArray(namespacePrefixesActuallyUsed, attribute.getValue());
         // alphabetically sort name values
-        attribute.setValue(sortReferenceValues(attribute.getQualifiedName(), attribute.getValue(), PropertyType.NAME));
+        attribute.setValue(sortReferenceValues(attribute.getValue(), PropertyType.NAME));
       }
       else if (StringUtils.startsWith(attribute.getValue(), "{WeakReference}")) {
         // alphabetically sort weak reference values
-        attribute.setValue(sortReferenceValues(attribute.getQualifiedName(), attribute.getValue(), PropertyType.WEAKREFERENCE));
+        attribute.setValue(sortReferenceValues(attribute.getValue(), PropertyType.WEAKREFERENCE));
       }
       if (!excluded) {
         collectNamespacePrefix(namespacePrefixesActuallyUsed, attribute.getNamespacePrefix());
@@ -387,6 +392,15 @@ public final class ContentUnpacker {
       collectNamespacePrefix(namespacePrefixesActuallyUsed, CQ_NAMESPACE.getPrefix());
     }
 
+    // if current element is a replication element, but the jcr:content node to set the replication attributes to is missing, add it
+    if (isReplicationElement && element.getChild("content", JCR_NAMESPACE) == null
+        && matches(path + "/jcr:content", markReplicationActivatedIncludeNodes, true)) {
+      Element contentNode = new Element("content", JCR_NAMESPACE);
+      String jcrContentPrimaryType = StringUtils.equals(jcrPrimaryType, "cq:Template") ? "cq:PageContent" : jcrPrimaryType + "Content";
+      contentNode.setAttribute("primaryType", jcrContentPrimaryType, JCR_NAMESPACE);
+      element.addContent(contentNode);
+    }
+
     List<Element> children = new ArrayList<>(element.getChildren());
     for (Element child : children) {
       applyXmlExcludes(child, path, namespacePrefixesActuallyUsed, (insideReplicationElement || isReplicationElement) && !isContent);
@@ -398,14 +412,12 @@ public final class ContentUnpacker {
       return value;
     }
 
-    DocViewProperty prop = DocViewProperty.parse(MIXINS_PROPERTY, value);
-    List<Value> mixins = new ArrayList<>();
-    for (int i = 0; i < prop.values.length; i++) {
-      String mixin = prop.values[i];
+    List<String> mixins = new ArrayList<>();
+    for (String mixin : DocViewUtil.parseValues(value)) {
       if (!matches(mixin, this.excludeMixins, false)) {
         String namespacePrefix = StringUtils.substringBefore(mixin, ":");
         collectNamespacePrefix(namespacePrefixesActuallyUsed, namespacePrefix);
-        mixins.add(new MockValue(mixin, PropertyType.STRING));
+        mixins.add(mixin);
       }
     }
 
@@ -413,12 +425,7 @@ public final class ContentUnpacker {
       return null;
     }
 
-    try {
-      return DocViewProperty.format(new MockProperty(MIXINS_PROPERTY, true, mixins.toArray(new Value[0])));
-    }
-    catch (RepositoryException ex) {
-      throw new RuntimeException("Unable to format value for " + MIXINS_PROPERTY, ex);
-    }
+    return DocViewUtil.formatValues(mixins);
   }
 
   private void addMixin(Element element, String mixin) {
@@ -426,25 +433,15 @@ public final class ContentUnpacker {
 
     List<String> mixins = new ArrayList<>();
     if (!StringUtils.isBlank(mixinsString)) {
-      DocViewProperty prop = DocViewProperty.parse(MIXINS_PROPERTY, mixinsString);
-      for (int i = 0; i < prop.values.length; i++) {
-        mixins.add(prop.values[i]);
+      for (String item : DocViewUtil.parseValues(mixinsString)) {
+        mixins.add(item);
       }
     }
     if (!mixins.contains(mixin)) {
       mixins.add(mixin);
     }
 
-    try {
-      Value[] values = mixins.stream()
-          .map(item -> new MockValue(item, PropertyType.STRING))
-          .toArray(size -> new Value[size]);
-      mixinsString = DocViewProperty.format(new MockProperty(MIXINS_PROPERTY, true, values));
-      element.setAttribute("mixinTypes", mixinsString, JCR_NAMESPACE);
-    }
-    catch (RepositoryException ex) {
-      throw new RuntimeException("Unable to format value for " + MIXINS_PROPERTY, ex);
-    }
+    element.setAttribute("mixinTypes", DocViewUtil.formatValues(mixins), JCR_NAMESPACE);
   }
 
   private void collectNamespacePrefix(Set<String> prefixes, String prefix) {
@@ -453,10 +450,8 @@ public final class ContentUnpacker {
     }
   }
 
-  private void collectNamespacePrefixNameArray(Set<String> prefixes, String name, String value) {
-    DocViewProperty prop = DocViewProperty.parse(name, value);
-    for (int i = 0; i < prop.values.length; i++) {
-      String item = prop.values[i];
+  private void collectNamespacePrefixNameArray(Set<String> prefixes, String value) {
+    for (String item : DocViewUtil.parseValues(value)) {
       String namespacePrefix = StringUtils.substringBefore(item, ":");
       collectNamespacePrefix(prefixes, namespacePrefix);
     }
@@ -464,387 +459,16 @@ public final class ContentUnpacker {
 
   /**
    * Sort weak reference values alphabetically to ensure consistent ordering.
-   * @param name Property name
    * @param value Property value
    * @param propertyType Property type from {@link PropertyType}
    * @return Property value with sorted references
    */
-  private String sortReferenceValues(String name, String value, int propertyType) {
+  private String sortReferenceValues(String value, int propertyType) {
     Set<String> refs = new TreeSet<>();
-    DocViewProperty prop = DocViewProperty.parse(name, value);
-    for (int i = 0; i < prop.values.length; i++) {
-      refs.add(prop.values[i]);
+    for (String item : DocViewUtil.parseValues(value)) {
+      refs.add(item);
     }
-    List<Value> values = new ArrayList<>();
-    for (String ref : refs) {
-      values.add(new MockValue(ref, propertyType));
-    }
-    try {
-      return DocViewProperty.format(new MockProperty(name, true, values.toArray(new Value[0])));
-    }
-    catch (RepositoryException ex) {
-      throw new RuntimeException("Unable to format value for " + name, ex);
-    }
-  }
-
-  /**
-   * Mock implementations of JCR property and value to be handed over to {@link DocViewProperty#format(Property)}
-   * method.
-   */
-  private static class MockProperty implements Property, PropertyDefinition {
-
-    private final String name;
-    private final boolean multiple;
-    private final Value[] values;
-
-    MockProperty(String name, boolean multiple, Value[] values) {
-      this.name = name;
-      this.multiple = multiple;
-      this.values = values;
-    }
-
-    @Override
-    public String getName() {
-      return name;
-    }
-
-    @Override
-    public int getType() {
-      if (values.length > 0) {
-        return values[0].getType();
-      }
-      return PropertyType.UNDEFINED;
-    }
-
-    @Override
-    public boolean isMultiple() {
-      return multiple;
-    }
-
-    @Override
-    public Value getValue() throws ValueFormatException {
-      if (multiple) {
-        throw new ValueFormatException("Property is multiple.");
-      }
-      return values[0];
-    }
-
-    @Override
-    public Value[] getValues() throws ValueFormatException {
-      if (!multiple) {
-        throw new ValueFormatException("Property is not multiple.");
-      }
-      return values;
-    }
-
-    @Override
-    public PropertyDefinition getDefinition() {
-      return this;
-    }
-
-
-    // -- unsupported methods --
-
-    @Override
-    public String getPath() {
-      throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public Item getAncestor(int depth) {
-      throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public Node getParent() {
-      throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public int getDepth() {
-      throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public Session getSession() {
-      throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public boolean isNode() {
-      throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public boolean isNew() {
-      throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public boolean isModified() {
-      throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public boolean isSame(Item otherItem) {
-      throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void accept(ItemVisitor visitor) {
-      throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void save() {
-      throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void refresh(boolean keepChanges) {
-      throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void remove() {
-      throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void setValue(Value value) {
-      throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void setValue(Value[] value) {
-      throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void setValue(String value) {
-      throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void setValue(String[] value) {
-      throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void setValue(InputStream value) {
-      throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void setValue(Binary value) {
-      throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void setValue(long value) {
-      throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void setValue(double value) {
-      throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void setValue(BigDecimal value) {
-      throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void setValue(Calendar value) {
-      throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void setValue(boolean value) {
-      throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void setValue(Node value) {
-      throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public String getString() {
-      throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public InputStream getStream() {
-      throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public Binary getBinary() {
-      throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public long getLong() {
-      throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public double getDouble() {
-      throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public BigDecimal getDecimal() {
-      throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public Calendar getDate() {
-      throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public boolean getBoolean() {
-      throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public Node getNode() {
-      throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public Property getProperty() {
-      throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public long getLength() {
-      throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public long[] getLengths() {
-      throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public NodeType getDeclaringNodeType() {
-      throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public boolean isAutoCreated() {
-      throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public boolean isMandatory() {
-      throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public int getOnParentVersion() {
-      throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public boolean isProtected() {
-      throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public int getRequiredType() {
-      throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public String[] getValueConstraints() {
-      throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public Value[] getDefaultValues() {
-      throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public String[] getAvailableQueryOperators() {
-      throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public boolean isFullTextSearchable() {
-      throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public boolean isQueryOrderable() {
-      throw new UnsupportedOperationException();
-    }
-
-  }
-
-  private static class MockValue implements Value {
-
-    private final String value;
-    private final int type;
-
-    MockValue(String value, int type) {
-      this.value = value;
-      this.type = type;
-    }
-
-    @Override
-    public String getString() {
-      return value;
-    }
-
-    @Override
-    public int getType() {
-      return type;
-    }
-
-
-    // -- unsupported methods --
-
-    @Override
-    public InputStream getStream() {
-      throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public Binary getBinary() {
-      throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public long getLong() {
-      throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public double getDouble() {
-      throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public BigDecimal getDecimal() {
-      throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public Calendar getDate() {
-      throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public boolean getBoolean() {
-      throw new UnsupportedOperationException();
-    }
-
+    return DocViewUtil.formatValues(new ArrayList<>(refs), propertyType);
   }
 
 }

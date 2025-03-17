@@ -53,7 +53,7 @@ public final class BundleStatus {
    * @return Status Line from JSON string
    * @deprecated Please use {@link #getStatusLineCompact()}
    */
-  @Deprecated
+  @Deprecated(since = "1.6.0")
   public String getStatusLine() {
     return this.statusLine;
   }
@@ -82,26 +82,44 @@ public final class BundleStatus {
     return sb.toString();
   }
 
+  /**
+   * @return Total bundles
+   */
   public int getTotal() {
     return this.total;
   }
 
+  /**
+   * @return Active bundles
+   */
   public int getActive() {
     return this.active;
   }
 
+  /**
+   * @return Active fragments
+   */
   public int getActiveFragment() {
     return this.activeFragment;
   }
 
+  /**
+   * @return Resolved bundles
+   */
   public int getResolved() {
     return this.resolved;
   }
 
+  /**
+   * @return Installed bundles
+   */
   public int getInstalled() {
     return this.installed;
   }
 
+  /**
+   * @return Ignored bundles
+   */
   public int getIgnored() {
     return ignored;
   }

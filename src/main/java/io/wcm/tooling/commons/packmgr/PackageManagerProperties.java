@@ -21,10 +21,9 @@ package io.wcm.tooling.commons.packmgr;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-
-import org.apache.commons.lang3.StringUtils;
 
 /**
  * Configuration properties for {@link PackageManagerHelper}.
@@ -63,6 +62,9 @@ public final class PackageManagerProperties {
     return this.packageManagerUrl;
   }
 
+  /**
+   * @param packageManagerUrl The URL of the HTTP service API of the CRX package manager.
+   */
   public void setPackageManagerUrl(String packageManagerUrl) {
     this.packageManagerUrl = packageManagerUrl;
   }
@@ -75,6 +77,9 @@ public final class PackageManagerProperties {
     return this.userId;
   }
 
+  /**
+   * @param userId The user name to authenticate as against the remote CRX system (package manager).
+   */
   public void setUserId(String userId) {
     this.userId = userId;
   }
@@ -87,6 +92,9 @@ public final class PackageManagerProperties {
     return this.password;
   }
 
+  /**
+   * @param password The password to authenticate against the remote CRX system (package manager).
+   */
   public void setPassword(String password) {
     this.password = password;
   }
@@ -100,7 +108,9 @@ public final class PackageManagerProperties {
     return this.oauth2AccessToken;
   }
 
-
+  /**
+   * @param value OAuth 2 access token to authenticate against the remote CRX system (package manager).
+   */
   public void setOAuth2AccessToken(String value) {
     this.oauth2AccessToken = value;
   }
@@ -111,9 +121,12 @@ public final class PackageManagerProperties {
    * @return User ID
    */
   public String getConsoleUserId() {
-    return StringUtils.defaultString(this.consoleUserId, this.userId);
+    return Objects.toString(this.consoleUserId, this.userId);
   }
 
+  /**
+   * @param consoleUserId The user name to authenticate as against the remote CRX system (Felix console).
+   */
   public void setConsoleUserId(String consoleUserId) {
     this.consoleUserId = consoleUserId;
   }
@@ -124,9 +137,12 @@ public final class PackageManagerProperties {
    * @return Password
    */
   public String getConsolePassword() {
-    return StringUtils.defaultString(this.consolePassword, this.password);
+    return Objects.toString(this.consolePassword, this.password);
   }
 
+  /**
+   * @param consolePassword The password to authenticate against the remote CRX system (Felix console).
+   */
   public void setConsolePassword(String consolePassword) {
     this.consolePassword = consolePassword;
   }
@@ -138,10 +154,12 @@ public final class PackageManagerProperties {
    * @return OAuth 2 access token.
    */
   public String getConsoleOAuth2AccessToken() {
-    return StringUtils.defaultString(this.consoleOauth2AccessToken, this.oauth2AccessToken);
+    return Objects.toString(this.consoleOauth2AccessToken, this.oauth2AccessToken);
   }
 
-
+  /**
+   * @param value OAuth 2 access token to authenticate against the remote CRX system (Felix console).
+   */
   public void setConsoleOAuth2AccessToken(String value) {
     this.consoleOauth2AccessToken = value;
   }
@@ -154,6 +172,9 @@ public final class PackageManagerProperties {
     return this.retryCount;
   }
 
+  /**
+   * @param retryCount Number of times to retry upload and install via CRX HTTP interface if it fails.
+   */
   public void setRetryCount(int retryCount) {
     this.retryCount = retryCount;
   }
@@ -166,6 +187,9 @@ public final class PackageManagerProperties {
     return this.retryDelaySec;
   }
 
+  /**
+   * @param retryDelaySec Number of seconds between retry attempts.
+   */
   public void setRetryDelaySec(int retryDelaySec) {
     this.retryDelaySec = retryDelaySec;
   }
@@ -182,6 +206,9 @@ public final class PackageManagerProperties {
     return this.bundleStatusUrl;
   }
 
+  /**
+   * @param bundleStatusUrl Bundle status JSON URL
+   */
   public void setBundleStatusUrl(String bundleStatusUrl) {
     this.bundleStatusUrl = bundleStatusUrl;
   }
@@ -195,6 +222,9 @@ public final class PackageManagerProperties {
     return this.bundleStatusWaitLimitSec;
   }
 
+  /**
+   * @param bundleStatusWaitLimitSec Number of seconds to wait as maximum for a positive bundle status
+   */
   public void setBundleStatusWaitLimitSec(int bundleStatusWaitLimitSec) {
     this.bundleStatusWaitLimitSec = bundleStatusWaitLimitSec;
   }
@@ -209,6 +239,10 @@ public final class PackageManagerProperties {
     return this.bundleStatusBlacklistBundleNames;
   }
 
+  /**
+   * @param bundleStatusBlacklistBundleNames Patterns for symbolic names of bundles that are expected to be not present
+   *          in bundle list
+   */
   public void setBundleStatusBlacklistBundleNames(List<String> bundleStatusBlacklistBundleNames) {
     this.bundleStatusBlacklistBundleNames = bundleStatusBlacklistBundleNames.stream()
         .map(Pattern::compile)
@@ -224,6 +258,9 @@ public final class PackageManagerProperties {
     return this.bundleStatusWhitelistBundleNames;
   }
 
+  /**
+   * @param bundleStatusWhitelistBundleNames Patterns for symbolic names of bundles that are ignored in bundle list
+   */
   public void setBundleStatusWhitelistBundleNames(List<String> bundleStatusWhitelistBundleNames) {
     this.bundleStatusWhitelistBundleNames = bundleStatusWhitelistBundleNames.stream()
         .map(Pattern::compile)
@@ -242,7 +279,9 @@ public final class PackageManagerProperties {
     return this.packageManagerInstallStatusURL;
   }
 
-
+  /**
+   * @param packageManagerInstallStatusURL Package Manager installation status JSON URL
+   */
   public void setPackageManagerInstallStatusURL(String packageManagerInstallStatusURL) {
     this.packageManagerInstallStatusURL = packageManagerInstallStatusURL;
   }
@@ -257,7 +296,10 @@ public final class PackageManagerProperties {
     return this.packageManagerInstallStatusWaitLimitSec;
   }
 
-
+  /**
+   * @param packageManagerInstallStatusWaitLimitSec Number of seconds to wait as maximum for a positive package manager
+   *          install status check
+   */
   public void setPackageManagerInstallStatusWaitLimitSec(int packageManagerInstallStatusWaitLimitSec) {
     this.packageManagerInstallStatusWaitLimitSec = packageManagerInstallStatusWaitLimitSec;
   }
@@ -270,6 +312,9 @@ public final class PackageManagerProperties {
     return this.relaxedSSLCheck;
   }
 
+  /**
+   * @param relaxedSSLCheck If set to true also self-signed certificates are accepted
+   */
   public void setRelaxedSSLCheck(boolean relaxedSSLCheck) {
     this.relaxedSSLCheck = relaxedSSLCheck;
   }
@@ -282,6 +327,9 @@ public final class PackageManagerProperties {
     return this.httpConnectTimeoutSec;
   }
 
+  /**
+   * @param httpConnectTimeoutSec HTTP connection timeout (in seconds)
+   */
   public void setHttpConnectTimeoutSec(int httpConnectTimeoutSec) {
     this.httpConnectTimeoutSec = httpConnectTimeoutSec;
   }
@@ -294,6 +342,9 @@ public final class PackageManagerProperties {
     return this.httpSocketTimeoutSec;
   }
 
+  /**
+   * @param httpSocketTimeoutSec HTTP socket timeout (in seconds)
+   */
   public void setHttpSocketTimeoutSec(int httpSocketTimeoutSec) {
     this.httpSocketTimeoutSec = httpSocketTimeoutSec;
   }
@@ -306,6 +357,9 @@ public final class PackageManagerProperties {
     return this.proxies;
   }
 
+  /**
+   * @param proxies HTTP proxies from maven settings
+   */
   public void setProxies(List<Proxy> proxies) {
     this.proxies = proxies;
   }
@@ -318,6 +372,9 @@ public final class PackageManagerProperties {
     return this.packageManagerOutputLogLevel;
   }
 
+  /**
+   * @param packageManagerOutputLogLevel Log level to be used to log responses from package manager
+   */
   public void setPackageManagerOutputLogLevel(String packageManagerOutputLogLevel) {
     this.packageManagerOutputLogLevel = packageManagerOutputLogLevel;
   }

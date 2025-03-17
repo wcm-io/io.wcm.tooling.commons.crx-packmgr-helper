@@ -22,6 +22,7 @@ package io.wcm.tooling.commons.packmgr.install;
 import java.io.File;
 import java.io.IOException;
 import java.util.Map;
+import java.util.Objects;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -49,6 +50,9 @@ public final class PackageFile {
     return this.file;
   }
 
+  /**
+   * @param file Content package file
+   */
   public void setFile(File file) {
     this.file = file;
   }
@@ -61,6 +65,9 @@ public final class PackageFile {
     return this.delayAfterInstallSec;
   }
 
+  /**
+   * @param delayAfterInstallSec Delay further steps after package installation by this amount of seconds
+   */
   public void setDelayAfterInstallSec(int delayAfterInstallSec) {
     this.delayAfterInstallSec = delayAfterInstallSec;
   }
@@ -72,7 +79,7 @@ public final class PackageFile {
   public void setDelayAfterInstallSecAutoDetect() {
     try {
       Map<String, Object> props = ContentPackageProperties.get(file);
-      String packageType = StringUtils.defaultString((String)props.get("packageType"), "content");
+      String packageType = Objects.toString(props.get("packageType"), "content");
       if (StringUtils.equals(packageType, "container") || StringUtils.equals(packageType, "mixed")) {
         this.delayAfterInstallSec = DEFAULT_DELAY_AFTER_CONTAINER_PACKAGE_SEC;
       }
@@ -90,6 +97,9 @@ public final class PackageFile {
     return this.install;
   }
 
+  /**
+   * @param install Whether to install (unpack) the uploaded package automatically or not.
+   */
   public void setInstall(boolean install) {
     this.install = install;
   }
@@ -107,10 +117,16 @@ public final class PackageFile {
     return this.force;
   }
 
+  /**
+   * @param force Force upload and install of content package. If set to false a package is not uploaded or installed
+   */
   public void setForce(Boolean force) {
     this.force = force;
   }
 
+  /**
+   * @param force Force upload and install of content package. If set to false a package is not uploaded or installed
+   */
   // keep signature for backwards compatibility
   public void setForce(boolean force) {
     this.force = force;
@@ -124,6 +140,9 @@ public final class PackageFile {
     return this.recursive;
   }
 
+  /**
+   * @param recursive If set to true nested packages get installed as well.
+   */
   public void setRecursive(boolean recursive) {
     this.recursive = recursive;
   }
@@ -136,6 +155,9 @@ public final class PackageFile {
     return this.httpSocketTimeoutSec;
   }
 
+  /**
+   * @param httpSocketTimeoutSec HTTP socket timeout (in seconds)
+   */
   public void setHttpSocketTimeoutSec(Integer httpSocketTimeoutSec) {
     this.httpSocketTimeoutSec = httpSocketTimeoutSec;
   }

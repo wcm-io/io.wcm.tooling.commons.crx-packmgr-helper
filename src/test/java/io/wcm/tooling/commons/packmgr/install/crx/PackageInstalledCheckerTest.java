@@ -44,7 +44,7 @@ class PackageInstalledCheckerTest {
   }
 
   @Test
-  void testGetStatus() throws Exception {
+  void testGetStatus() {
     assertEquals(PackageInstalledStatus.NOT_FOUND, underTest.getStatus("invalidgroup", "invalidpackage", "1.0.0"));
     assertEquals(PackageInstalledStatus.INSTALLED, underTest.getStatus("day/cq60/product", "cq-wcm-content", "6.3.214"));
     assertEquals(PackageInstalledStatus.INSTALLED_OTHER_VERSION, underTest.getStatus("Netcentric", "accesscontroltool-package", "2.0.6"));

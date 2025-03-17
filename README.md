@@ -7,7 +7,7 @@
 Java Library for uploading and downloading AEM content packages via CRX Package Manager.
 
 Documentation: https://wcm.io/tooling/commons/crx-packmgr-helper/<br/>
-Issues: https://wcm-io.atlassian.net/browse/WTOOL<br/>
+Issues: https://github.com/wcm-io/io.wcm.tooling.commons.crx-packmgr-helper/issues<br/>
 Wiki: https://wcm-io.atlassian.net/wiki/<br/>
 Continuous Integration: https://github.com/wcm-io/io.wcm.tooling.commons.crx-packmgr-helper/actions<br/>
 Commercial support: https://wcm.io/commercial-support.html

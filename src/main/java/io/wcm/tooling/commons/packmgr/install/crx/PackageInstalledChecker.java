@@ -33,7 +33,7 @@ import io.wcm.tooling.commons.packmgr.PackageManagerException;
  * Check if given package and version is already installed by inspecting the JSON result of
  * <code>/crx/packmgr/list.jsp</code>.
  */
-class PackageInstalledChecker {
+final class PackageInstalledChecker {
 
   private final JSONArray results;
 

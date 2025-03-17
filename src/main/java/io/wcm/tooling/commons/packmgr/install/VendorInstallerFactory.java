@@ -23,6 +23,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.wcm.tooling.commons.packmgr.PackageManagerException;
+import io.wcm.tooling.commons.packmgr.download.VendorPackageDownloader;
+import io.wcm.tooling.commons.packmgr.download.composum.ComposumPackageDownloader;
+import io.wcm.tooling.commons.packmgr.download.crx.CrxPackageDownloader;
 import io.wcm.tooling.commons.packmgr.install.composum.ComposumPackageInstaller;
 import io.wcm.tooling.commons.packmgr.install.crx.CrxPackageInstaller;
 
@@ -133,4 +136,25 @@ public final class VendorInstallerFactory {
     return answer;
   }
 
+  /**
+   * Provides the Installer of the Service Vendor
+   * @param url Base URL of the service
+   * @return Installer if URL is supported otherwise null
+   * @throws PackageManagerException Package manager exception
+   */
+  public static VendorPackageDownloader getPackageDownloader(String url) throws PackageManagerException {
+    VendorPackageDownloader answer;
+    switch (identify(url)) {
+      case COMPOSUM:
+        answer = new ComposumPackageDownloader();
+        break;
+      case CRX:
+        answer = new CrxPackageDownloader();
+        break;
+      default:
+        throw new PackageManagerException("Given URL is not supported: " + url);
+    }
+    return answer;
+  }
+  
 }

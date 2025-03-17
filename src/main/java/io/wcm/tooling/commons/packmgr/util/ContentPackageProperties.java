@@ -52,7 +52,7 @@ public final class ContentPackageProperties {
    * @throws IOException I/O exception
    */
   public static Map<String, Object> get(File packageFile) throws IOException {
-    try (ZipFile zipFile = new ZipFile(packageFile)) {
+    try (ZipFile zipFile = new ZipFile.Builder().setFile(packageFile).get()) {
       ZipArchiveEntry entry = zipFile.getEntry(ZIP_ENTRY_PROPERTIES);
       if (entry != null && !entry.isDirectory()) {
         Map<String, Object> props = getPackageProperties(zipFile, entry);

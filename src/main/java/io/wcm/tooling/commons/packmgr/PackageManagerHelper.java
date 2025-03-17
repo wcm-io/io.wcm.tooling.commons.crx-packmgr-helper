@@ -36,7 +36,6 @@ import org.apache.http.HttpException;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpRequestInterceptor;
-import org.apache.http.HttpResponse;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.AuthState;
 import org.apache.http.auth.Credentials;
@@ -44,7 +43,6 @@ import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.client.protocol.HttpClientContext;
-import org.apache.http.conn.ConnectionKeepAliveStrategy;
 import org.apache.http.conn.ssl.NoopHostnameVerifier;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.conn.ssl.TrustSelfSignedStrategy;
@@ -104,13 +102,8 @@ public final class PackageManagerHelper {
    */
   public @NotNull CloseableHttpClient getHttpClient() {
     HttpClientBuilder httpClientBuilder = HttpClients.custom()
-        .setKeepAliveStrategy(new ConnectionKeepAliveStrategy() {
-          @Override
-          public long getKeepAliveDuration(HttpResponse response, HttpContext context) {
-            // keep reusing connections to a minimum - may conflict when instance is restarting and responds in unexpected manner
-            return 1;
-          }
-        })
+        // keep reusing connections to a minimum - may conflict when instance is restarting and responds in unexpected manner
+        .setKeepAliveStrategy((response, context) -> 1)
         .addInterceptorFirst(new HttpRequestInterceptor() {
           @Override
           public void process(HttpRequest request, HttpContext context) throws HttpException, IOException {
@@ -247,9 +240,9 @@ public final class PackageManagerHelper {
         log.warn("---------------");
 
         StringBuilder msg = new StringBuilder();
-        msg.append("HTTP call failed, try again (" + (runCount + 1) + "/" + props.getRetryCount() + ")");
+        msg.append("HTTP call failed, try again (").append(runCount + 1).append("/").append(props.getRetryCount()).append(")");
         if (props.getRetryDelaySec() > 0) {
-          msg.append(" after " + props.getRetryDelaySec() + " second(s)");
+          msg.append(" after ").append(props.getRetryDelaySec()).append(" second(s)");
         }
         msg.append("...");
         log.warn(msg.toString());
