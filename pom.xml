@@ -109,7 +109,7 @@
     <dependency>
       <groupId>org.apache.jackrabbit</groupId>
       <artifactId>oak-jackrabbit-api</artifactId>
-      <version>1.80</version>
+      <version>1.82.0</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
