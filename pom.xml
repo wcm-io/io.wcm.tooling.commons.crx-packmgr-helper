@@ -137,7 +137,7 @@
     <dependency>
       <groupId>org.apache.jackrabbit.vault</groupId>
       <artifactId>org.apache.jackrabbit.vault</artifactId>
-      <version>3.8.4</version>
+      <version>4.0.0</version>
       <scope>compile</scope>
       <exclusions>
         <exclusion>
