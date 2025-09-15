@@ -70,6 +70,8 @@ import io.wcm.tooling.commons.packmgr.httpaction.PackageManagerInstallStatusCall
 import io.wcm.tooling.commons.packmgr.httpaction.PackageManagerJsonCall;
 import io.wcm.tooling.commons.packmgr.httpaction.PackageManagerStatusCall;
 import io.wcm.tooling.commons.packmgr.httpaction.PackageManagerXmlCall;
+import io.wcm.tooling.commons.packmgr.httpaction.SystemReadyStatus;
+import io.wcm.tooling.commons.packmgr.httpaction.SystemReadyStatusCall;
 import io.wcm.tooling.commons.packmgr.util.HttpClientUtil;
 
 /**
@@ -368,6 +370,49 @@ public final class PackageManagerHelper {
 
       // instance is ready
       if (instanceReady) {
+        break;
+      }
+    }
+  }
+
+  /**
+   * Wait for system ready status to get OK.
+   * @param httpClient HTTP client
+   * @param context HTTP client context
+   */
+  @SuppressWarnings("PMD.GuardLogStatement")
+  public void waitForSystemReady(CloseableHttpClient httpClient, HttpClientContext context) {
+    if (StringUtils.isBlank(props.getSystemReadyUrl())) {
+      log.debug("Skipping check for system ready because no systemReadyURL is defined.");
+      return;
+    }
+
+    final int WAIT_INTERVAL_SEC = 3;
+    final long CHECK_RETRY_COUNT = props.getSystemReadyWaitLimitSec() / WAIT_INTERVAL_SEC;
+
+    log.info("Check system ready status...");
+    boolean systemReady = true;
+    for (int i = 1; i <= CHECK_RETRY_COUNT; i++) {
+      boolean lastTry = (i == CHECK_RETRY_COUNT);
+
+      SystemReadyStatusCall call = new SystemReadyStatusCall(httpClient, context, props.getSystemReadyUrl());
+      SystemReadyStatus systemReadyStatus = executeHttpCallWithRetry(call, 0);
+
+      // check if bundles are still stopping/staring
+      if (!systemReadyStatus.isSystemReadyOK()) {
+        if (lastTry) {
+          throw new PackageManagerException("System is NOT ready (" + systemReadyStatus.getOverallResult() + ") - package deployment failed.\n"
+              + systemReadyStatus.getFailureInfoString());
+        }
+        log.warn("System is NOT ready ({}) - wait {} sec (max. {} sec) ...\n{}",
+            systemReadyStatus.getOverallResult(), WAIT_INTERVAL_SEC, props.getSystemReadyWaitLimitSec(),
+            systemReadyStatus.getFailureInfoString());
+        sleep(WAIT_INTERVAL_SEC);
+        systemReady = false;
+      }
+
+      // instance is ready
+      if (systemReady) {
         break;
       }
     }

@@ -43,6 +43,8 @@ public final class PackageManagerProperties {
   private int bundleStatusWaitLimitSec = 360;
   private List<Pattern> bundleStatusBlacklistBundleNames = Collections.emptyList();
   private List<Pattern> bundleStatusWhitelistBundleNames = Collections.emptyList();
+  private String systemReadyUrl;
+  private int systemReadyWaitLimitSec = 30;
   private String packageManagerInstallStatusURL;
   private int packageManagerInstallStatusWaitLimitSec = 360;
   private boolean relaxedSSLCheck;
@@ -265,6 +267,38 @@ public final class PackageManagerProperties {
     this.bundleStatusWhitelistBundleNames = bundleStatusWhitelistBundleNames.stream()
         .map(Pattern::compile)
         .collect(Collectors.toList());
+  }
+
+  /**
+   * System ready status JSON URL. If an URL is configured the system ready status is checked.
+   * @return URL
+   */
+  public String getSystemReadyUrl() {
+    return this.systemReadyUrl;
+  }
+
+  /**
+   * @param systemReadyUrl System ready status JSON URL. If an URL is configured the system ready status is checked.
+   */
+  public void setSystemReadyUrl(String systemReadyUrl) {
+    this.systemReadyUrl = systemReadyUrl;
+  }
+
+  /**
+   * Number of seconds to wait as maximum for a positive system ready status check.
+   * If this limit is reached and the system ready status is still not positive the install of the package proceeds
+   * anyway.
+   * @return Limit in seconds
+   */
+  public int getSystemReadyWaitLimitSec() {
+    return this.systemReadyWaitLimitSec;
+  }
+
+  /**
+   * @param systemReadyWaitLimitSec Number of seconds to wait as maximum for a positive system ready status check
+   */
+  public void setSystemReadyWaitLimitSec(int systemReadyWaitLimitSec) {
+    this.systemReadyWaitLimitSec = systemReadyWaitLimitSec;
   }
 
   /**

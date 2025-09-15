@@ -1,0 +1,127 @@
+{
+  "overallResult": "CRITICAL",
+  "results": [
+    {
+      "name": "betacloudProject - Required Components",
+      "status": "CRITICAL",
+      "timeInMs": 6,
+      "finishedAt": "2025-09-15T12:27:28.430",
+      "tags": [
+        "betacloudProject",
+        "systemready"
+      ],
+      "messages": [
+        {
+          "status": "OK",
+          "message": "No component with name io.wcm.handler.mediasource.dam.impl.dynamicmedia.DynamicMediaSupportServiceImplx is registered in SCR runtime"
+        },
+        {
+          "status": "TEMPORARILY_UNAVAILABLE",
+          "message": "1 required components are missing in SCR runtime"
+        },
+        {
+          "status": "OK",
+          "message": "5 required components are active"
+        },
+        {
+          "status": "CRITICAL",
+          "message": "Grace period for being temporarily unavailable exceeded by 50.7min (configured grace period: 10min)"
+        }
+      ]
+    },
+    {
+      "name": "All bundles are up",
+      "status": "OK",
+      "timeInMs": 0,
+      "finishedAt": "2025-09-15T12:27:28.424",
+      "tags": [
+        "systemalive",
+        "systemready"
+      ],
+      "messages": [
+        {
+          "status": "OK",
+          "message": "All 646 bundles are started"
+        }
+      ]
+    },
+    {
+      "name": "BundledScriptTracker Healthcheck",
+      "status": "OK",
+      "timeInMs": 0,
+      "finishedAt": "2025-09-15T12:27:28.424",
+      "tags": [
+        "systemready"
+      ],
+      "messages": [
+        {
+          "status": "OK",
+          "message": "All expected bundles have registered their scripts."
+        }
+      ]
+    },
+    {
+      "name": "OSGi Framework Ready Check",
+      "status": "OK",
+      "timeInMs": 0,
+      "finishedAt": "2025-09-15T12:27:28.424",
+      "tags": [
+        "systemalive",
+        "systemready"
+      ],
+      "messages": [
+        {
+          "status": "OK",
+          "message": "Framework started (state: ACTIVE) Current Start Level: 30 (Target: 20; Beginning: 1)"
+        }
+      ]
+    },
+    {
+      "name": "Required Components",
+      "status": "OK",
+      "timeInMs": 0,
+      "finishedAt": "2025-09-15T12:27:28.424",
+      "tags": [
+        "systemalive",
+        "systemready"
+      ],
+      "messages": [
+        {
+          "status": "OK",
+          "message": "19 required components are active"
+        }
+      ]
+    },
+    {
+      "name": "Required Components (custom)",
+      "status": "OK",
+      "timeInMs": 0,
+      "finishedAt": "2025-09-15T12:27:28.424",
+      "tags": [
+        "systemalive",
+        "systemready"
+      ],
+      "messages": [
+        {
+          "status": "OK",
+          "message": "1 required components are active"
+        }
+      ]
+    },
+    {
+      "name": "Required Services",
+      "status": "OK",
+      "timeInMs": 0,
+      "finishedAt": "2025-09-15T12:27:28.424",
+      "tags": [
+        "systemready"
+      ],
+      "messages": [
+        {
+          "status": "OK",
+          "message": "All 2 required services are available"
+        }
+      ]
+    }
+  ]
+}
