@@ -20,6 +20,9 @@
 package io.wcm.tooling.commons.packmgr.httpaction;
 
 import java.util.List;
+import java.util.Optional;
+
+import org.apache.commons.lang3.Strings;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -32,6 +35,8 @@ public final class SystemReadyStatus {
 
   private final String overallResult;
   private final List<Result> results;
+
+  private static final String STATUS_OK = "OK";
 
   /**
    * Constructor.
@@ -50,6 +55,40 @@ public final class SystemReadyStatus {
 
   public List<Result> getResults() {
     return results;
+  }
+
+  /**
+   * Checks if the overall system ready status is OK.
+   * @return true if overall status is OK
+   */
+  public boolean isSystemReadyOK() {
+    return Strings.CI.equals(overallResult, STATUS_OK);
+  }
+
+  /**
+   * Returns a human-readable string with failure information if the system is not ready.
+   * If the system is ready, returns null.
+   * @return failure information string or null
+   */
+  public String getFailureInfoString() {
+    if (isSystemReadyOK()) {
+      return null;
+    }
+    StringBuilder sb = new StringBuilder();
+    sb.append("System is NOT ready: ").append(overallResult).append("\n");
+    for (Result result : Optional.ofNullable(results).orElse(List.of())) {
+      if (!Strings.CI.equals(result.getStatus(), STATUS_OK)) {
+        sb.append("- ").append(result.getStatus()).append(": ").append(result.getName()).append("\n");
+        for (Message message : Optional.ofNullable(result.getMessages()).orElse(List.of())) {
+          String notOkStatus = "";
+          if (!Strings.CI.equals(message.getStatus(), STATUS_OK)) {
+            notOkStatus = message.getStatus() + ": ";
+          }
+          sb.append("  * ").append(notOkStatus).append(message.getMessage()).append("\n");
+        }
+      }
+    }
+    return sb.toString();
   }
 
   /**
