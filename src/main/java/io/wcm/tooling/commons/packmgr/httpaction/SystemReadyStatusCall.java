@@ -70,19 +70,19 @@ public final class SystemReadyStatusCall implements HttpCall<SystemReadyStatus> 
         throw PackageManagerHttpActionException.forHttpError(systemReadyURL, response.getStatusLine(), responseString);
       }
 
-      return toSystemReadyStatus(responseString);
+      return toSystemReadyStatus(responseString, systemReadyURL);
     }
     catch (IOException ex) {
       throw PackageManagerHttpActionException.forIOException(systemReadyURL, ex);
     }
   }
 
-  static SystemReadyStatus toSystemReadyStatus(String jsonString) {
+  static SystemReadyStatus toSystemReadyStatus(String jsonString, String systemReadyURL) {
     try {
       return JSON_MAPPER.readValue(jsonString, SystemReadyStatus.class);
     }
     catch (JsonProcessingException ex) {
-      throw new PackageManagerHttpActionException("JSON parse failure: " + ex.getMessage(), ex);
+      throw PackageManagerHttpActionException.forJSONException(systemReadyURL, jsonString, ex);
     }
   }
 

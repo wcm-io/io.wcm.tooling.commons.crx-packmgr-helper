@@ -41,7 +41,7 @@ class SystemReadyStatusCallTest {
       String jsonContent = IOUtils.toString(is, StandardCharsets.UTF_8);
 
       // Parse JSON using the static method
-      SystemReadyStatus status = SystemReadyStatusCall.toSystemReadyStatus(jsonContent);
+      SystemReadyStatus status = SystemReadyStatusCall.toSystemReadyStatus(jsonContent, null);
 
       // Verify overall result
       assertNotNull(status);
@@ -59,7 +59,7 @@ class SystemReadyStatusCallTest {
 
     assertThrows(
         PackageManagerHttpActionException.class,
-        () -> SystemReadyStatusCall.toSystemReadyStatus(invalidJson)
+        () -> SystemReadyStatusCall.toSystemReadyStatus(invalidJson, null)
     );
   }
 
@@ -68,7 +68,7 @@ class SystemReadyStatusCallTest {
     String emptyJson = "{}";
 
     // Should not throw exception, but fields should be null
-    SystemReadyStatus status = SystemReadyStatusCall.toSystemReadyStatus(emptyJson);
+    SystemReadyStatus status = SystemReadyStatusCall.toSystemReadyStatus(emptyJson, null);
     assertNotNull(status);
     // Fields will be null since they're not present in JSON
   }
