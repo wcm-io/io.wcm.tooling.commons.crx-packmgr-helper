@@ -1,0 +1,99 @@
+{
+  "overallResult": "OK",
+  "results": [
+    {
+      "name": "All bundles are up",
+      "status": "OK",
+      "timeInMs": 0,
+      "finishedAt": "2025-09-15T12:27:28.424",
+      "tags": [
+        "systemalive",
+        "systemready"
+      ],
+      "messages": [
+        {
+          "status": "OK",
+          "message": "All 646 bundles are started"
+        }
+      ]
+    },
+    {
+      "name": "BundledScriptTracker Healthcheck",
+      "status": "OK",
+      "timeInMs": 0,
+      "finishedAt": "2025-09-15T12:27:28.424",
+      "tags": [
+        "systemready"
+      ],
+      "messages": [
+        {
+          "status": "OK",
+          "message": "All expected bundles have registered their scripts."
+        }
+      ]
+    },
+    {
+      "name": "OSGi Framework Ready Check",
+      "status": "OK",
+      "timeInMs": 0,
+      "finishedAt": "2025-09-15T12:27:28.424",
+      "tags": [
+        "systemalive",
+        "systemready"
+      ],
+      "messages": [
+        {
+          "status": "OK",
+          "message": "Framework started (state: ACTIVE) Current Start Level: 30 (Target: 20; Beginning: 1)"
+        }
+      ]
+    },
+    {
+      "name": "Required Components",
+      "status": "OK",
+      "timeInMs": 0,
+      "finishedAt": "2025-09-15T12:27:28.424",
+      "tags": [
+        "systemalive",
+        "systemready"
+      ],
+      "messages": [
+        {
+          "status": "OK",
+          "message": "19 required components are active"
+        }
+      ]
+    },
+    {
+      "name": "Required Components (custom)",
+      "status": "OK",
+      "timeInMs": 0,
+      "finishedAt": "2025-09-15T12:27:28.424",
+      "tags": [
+        "systemalive",
+        "systemready"
+      ],
+      "messages": [
+        {
+          "status": "OK",
+          "message": "1 required components are active"
+        }
+      ]
+    },
+    {
+      "name": "Required Services",
+      "status": "OK",
+      "timeInMs": 0,
+      "finishedAt": "2025-09-15T12:27:28.424",
+      "tags": [
+        "systemready"
+      ],
+      "messages": [
+        {
+          "status": "OK",
+          "message": "All 2 required services are available"
+        }
+      ]
+    }
+  ]
+}

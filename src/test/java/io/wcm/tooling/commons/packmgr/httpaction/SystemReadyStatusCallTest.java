@@ -20,8 +20,11 @@
 package io.wcm.tooling.commons.packmgr.httpaction;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -35,9 +38,32 @@ import io.wcm.tooling.commons.packmgr.PackageManagerHttpActionException;
 class SystemReadyStatusCallTest {
 
   @Test
-  void testToSystemReadyStatus() throws IOException {
+  void testToSystemReadyStatus_OK() throws IOException {
     // Load test JSON file
-    try (InputStream is = getClass().getResourceAsStream("/packmgr/systemreadyresponse.json")) {
+    try (InputStream is = getClass().getResourceAsStream("/packmgr/systemreadyresponse-ok.json")) {
+      String jsonContent = IOUtils.toString(is, StandardCharsets.UTF_8);
+
+      // Parse JSON using the static method
+      SystemReadyStatus status = SystemReadyStatusCall.toSystemReadyStatus(jsonContent, null);
+
+      // Verify overall result
+      assertNotNull(status);
+      assertEquals("OK", status.getOverallResult());
+
+      // Verify results list (do not check further details here)
+      assertNotNull(status.getResults());
+      assertEquals(6, status.getResults().size());
+
+      // Verify overall status
+      assertTrue(status.isSystemReadyOK());
+      assertNull(status.getFailureInfoString());
+    }
+  }
+
+  @Test
+  void testToSystemReadyStatus_Critical() throws IOException {
+    // Load test JSON file
+    try (InputStream is = getClass().getResourceAsStream("/packmgr/systemreadyresponse-critical.json")) {
       String jsonContent = IOUtils.toString(is, StandardCharsets.UTF_8);
 
       // Parse JSON using the static method
@@ -50,6 +76,10 @@ class SystemReadyStatusCallTest {
       // Verify results list (do not check further details here)
       assertNotNull(status.getResults());
       assertEquals(7, status.getResults().size());
+
+      // Verify overall status
+      assertFalse(status.isSystemReadyOK());
+      assertNotNull(status.getFailureInfoString());
     }
   }
 
