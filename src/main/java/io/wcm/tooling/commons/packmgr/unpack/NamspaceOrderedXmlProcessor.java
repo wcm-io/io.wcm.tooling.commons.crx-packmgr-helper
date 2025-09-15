@@ -25,7 +25,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.jdom2.Attribute;
 import org.jdom2.Content;
 import org.jdom2.Element;
@@ -89,7 +89,7 @@ class NamspaceOrderedXmlProcessor extends AbstractXMLOutputProcessor {
       for (String prefix : namespacePrefixes) {
         for (int i = 0; i < definedNamespaces.size(); i++) {
           Namespace ns = definedNamespaces.get(i);
-          if (StringUtils.equals(prefix, ns.getPrefix())) {
+          if (Strings.CS.equals(prefix, ns.getPrefix())) {
             if (namespacePrefixesActuallyUsed.contains(ns.getPrefix())) {
               printNamespace(out, fstack, ns);
             }

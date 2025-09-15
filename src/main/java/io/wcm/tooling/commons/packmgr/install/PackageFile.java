@@ -24,7 +24,7 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.Objects;
 
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 
 import io.wcm.tooling.commons.packmgr.util.ContentPackageProperties;
 
@@ -80,7 +80,7 @@ public final class PackageFile {
     try {
       Map<String, Object> props = ContentPackageProperties.get(file);
       String packageType = Objects.toString(props.get("packageType"), "content");
-      if (StringUtils.equals(packageType, "container") || StringUtils.equals(packageType, "mixed")) {
+      if (Strings.CS.equals(packageType, "container") || Strings.CS.equals(packageType, "mixed")) {
         this.delayAfterInstallSec = DEFAULT_DELAY_AFTER_CONTAINER_PACKAGE_SEC;
       }
     }
@@ -112,7 +112,7 @@ public final class PackageFile {
   public boolean isForce() {
     // if no force parameter was set auto-detect best-matching force mode from file name
     if (this.force == null) {
-      return StringUtils.contains(file.getName(), "-SNAPSHOT");
+      return Strings.CS.contains(file.getName(), "-SNAPSHOT");
     }
     return this.force;
   }

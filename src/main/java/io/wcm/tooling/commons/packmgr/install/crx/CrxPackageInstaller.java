@@ -25,7 +25,7 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.Map;
 
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.protocol.HttpClientContext;
@@ -140,7 +140,7 @@ public class CrxPackageInstaller implements VendorPackageInstaller {
         log.info("Package uploaded successfully to {} (without installing).", path);
       }
     }
-    else if (StringUtils.startsWith(msg, CRX_PACKAGE_EXISTS_ERROR_MESSAGE_PREFIX) && !force) {
+    else if (Strings.CS.startsWith(msg, CRX_PACKAGE_EXISTS_ERROR_MESSAGE_PREFIX) && !force) {
       log.info("Package skipped because it was already uploaded.");
     }
     else {

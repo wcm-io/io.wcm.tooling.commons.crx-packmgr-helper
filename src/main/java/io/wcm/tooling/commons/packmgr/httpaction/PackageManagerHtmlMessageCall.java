@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpRequestBase;
@@ -87,17 +88,17 @@ public final class PackageManagerHtmlMessageCall implements HttpCall<String> {
         responseString = TEXT_LINE_BREAKS.matcher(responseString).replaceAll("");
         responseString = HTML_LINE_BREAKS.matcher(responseString).replaceAll("\n");
         responseString = HTML_ANYTAG.matcher(responseString).replaceAll("");
-        responseString = StringUtils.replace(responseString, "&nbsp;", " ");
+        responseString = Strings.CS.replace(responseString, "&nbsp;", " ");
         responseString = "\n" + StringUtils.trim(responseString);
 
-        if (StringUtils.equalsIgnoreCase(props.getPackageManagerOutputLogLevel(), "debug")) {
+        if (Strings.CI.equals(props.getPackageManagerOutputLogLevel(), "debug")) {
           log.debug(responseString);
         }
         else {
           log.info(responseString);
         }
 
-        if (StringUtils.contains(responseString, PACKAGE_MANAGER_ERROR_INDICATION)) {
+        if (Strings.CS.contains(responseString, PACKAGE_MANAGER_ERROR_INDICATION)) {
           throw new PackageManagerException("Package installation failed: " + PACKAGE_MANAGER_ERROR_INDICATION + "\n"
               + method.getURI());
         }
