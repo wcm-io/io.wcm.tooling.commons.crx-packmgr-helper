@@ -40,7 +40,7 @@ class SystemReadyStatusCallTest {
   @Test
   void testToSystemReadyStatus_OK() throws IOException {
     // Load test JSON file
-    try (InputStream is = getClass().getResourceAsStream("/packmgr/systemreadyresponse-ok.json")) {
+    try (InputStream is = getClass().getClassLoader().getResourceAsStream("packmgr/systemreadyresponse-ok.json")) {
       String jsonContent = IOUtils.toString(is, StandardCharsets.UTF_8);
 
       // Parse JSON using the static method
@@ -63,7 +63,7 @@ class SystemReadyStatusCallTest {
   @Test
   void testToSystemReadyStatus_Critical() throws IOException {
     // Load test JSON file
-    try (InputStream is = getClass().getResourceAsStream("/packmgr/systemreadyresponse-critical.json")) {
+    try (InputStream is = getClass().getClassLoader().getResourceAsStream("packmgr/systemreadyresponse-critical.json")) {
       String jsonContent = IOUtils.toString(is, StandardCharsets.UTF_8);
 
       // Parse JSON using the static method

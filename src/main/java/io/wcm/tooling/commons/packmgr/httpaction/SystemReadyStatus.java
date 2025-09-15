@@ -22,13 +22,14 @@ package io.wcm.tooling.commons.packmgr.httpaction;
 import java.util.List;
 import java.util.Optional;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Strings;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
- * POJO to map systemready JSON response to via Jackson.
+ * POJO to map system ready JSON response to via Jackson.
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public final class SystemReadyStatus {
@@ -62,7 +63,7 @@ public final class SystemReadyStatus {
    * @return true if overall status is OK
    */
   public boolean isSystemReadyOK() {
-    return Strings.CI.equals(overallResult, STATUS_OK);
+    return StringUtils.isBlank(overallResult) || Strings.CI.equals(overallResult, STATUS_OK);
   }
 
   /**
