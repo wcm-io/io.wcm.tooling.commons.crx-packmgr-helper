@@ -26,7 +26,7 @@
 
     <release version="2.3.0" date="not released">
       <action type="add" dev="sseifert" issue="36">
-        CRX Package Manager: Add system ready check after deployment (configurable).
+        CRX Package Manager Upload: Add system ready check after deployment (configurable).
       </action>
     </release>
 
