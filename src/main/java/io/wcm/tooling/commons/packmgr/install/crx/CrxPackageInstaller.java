@@ -135,6 +135,8 @@ public class CrxPackageInstaller implements VendorPackageInstaller {
         pkgmgr.waitForBundlesActivation(httpClient, consoleHttpClientContext);
         // after install: if packages are still installing, wait for completion
         pkgmgr.waitForPackageManagerInstallStatusFinished(httpClient, packageManagerHttpClientContext);
+        // after install: validate system ready status
+        pkgmgr.waitForSystemReady(httpClient, consoleHttpClientContext);
       }
       else {
         log.info("Package uploaded successfully to {} (without installing).", path);

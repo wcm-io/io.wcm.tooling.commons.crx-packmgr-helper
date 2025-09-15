@@ -76,7 +76,6 @@ public final class SystemReadyStatus {
       return null;
     }
     StringBuilder sb = new StringBuilder();
-    sb.append("System is NOT ready: ").append(overallResult).append("\n");
     for (Result result : Optional.ofNullable(results).orElse(List.of())) {
       if (!Strings.CI.equals(result.getStatus(), STATUS_OK)) {
         sb.append("- ").append(result.getStatus()).append(": ").append(result.getName()).append("\n");
