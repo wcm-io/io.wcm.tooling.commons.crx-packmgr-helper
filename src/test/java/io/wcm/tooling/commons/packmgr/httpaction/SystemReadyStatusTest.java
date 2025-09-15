@@ -35,12 +35,12 @@ import org.junit.jupiter.api.Test;
 
 import io.wcm.tooling.commons.packmgr.PackageManagerHttpActionException;
 
-class SystemReadyStatusCallTest {
+class SystemReadyStatusTest {
 
   @Test
   void testToSystemReadyStatus_OK() throws IOException {
     // Load test JSON file
-    try (InputStream is = getClass().getClassLoader().getResourceAsStream("packmgr/systemreadyresponse-ok.json")) {
+    try (InputStream is = getClass().getClassLoader().getResourceAsStream("packmgr/systemReadyResponse-ok.json")) {
       String jsonContent = IOUtils.toString(is, StandardCharsets.UTF_8);
 
       // Parse JSON using the static method
@@ -63,7 +63,7 @@ class SystemReadyStatusCallTest {
   @Test
   void testToSystemReadyStatus_Critical() throws IOException {
     // Load test JSON file
-    try (InputStream is = getClass().getClassLoader().getResourceAsStream("packmgr/systemreadyresponse-critical.json")) {
+    try (InputStream is = getClass().getClassLoader().getResourceAsStream("packmgr/systemReadyResponse-critical.json")) {
       String jsonContent = IOUtils.toString(is, StandardCharsets.UTF_8);
 
       // Parse JSON using the static method
@@ -100,7 +100,10 @@ class SystemReadyStatusCallTest {
     // Should not throw exception, but fields should be null
     SystemReadyStatus status = SystemReadyStatusCall.toSystemReadyStatus(emptyJson, null);
     assertNotNull(status);
-    // Fields will be null since they're not present in JSON
+
+    // Verify overall status
+    assertTrue(status.isSystemReadyOK());
+    assertNull(status.getFailureInfoString());
   }
 
 }
