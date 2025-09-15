@@ -391,15 +391,20 @@ public final class PackageManagerHelper {
     final long CHECK_RETRY_COUNT = props.getSystemReadyWaitLimitSec() / WAIT_INTERVAL_SEC;
 
     log.info("Check system ready status...");
+    boolean systemReady = true;
     for (int i = 1; i <= CHECK_RETRY_COUNT; i++) {
+      boolean lastTry = (i == CHECK_RETRY_COUNT);
+
       SystemReadyStatusCall call = new SystemReadyStatusCall(httpClient, context, props.getSystemReadyUrl());
       SystemReadyStatus systemReadyStatus = executeHttpCallWithRetry(call, 0);
 
-      boolean systemReady = true;
-
       // check if bundles are still stopping/staring
       if (!systemReadyStatus.isSystemReadyOK()) {
-        log.info("System is NOT ready ({}) - wait {} sec (max. {} sec) ...\n{}",
+        if (lastTry) {
+          throw new PackageManagerException("System is NOT ready (" + systemReadyStatus.getOverallResult() + ") - package deployment failed.\n"
+              + systemReadyStatus.getFailureInfoString());
+        }
+        log.warn("System is NOT ready ({}) - wait {} sec (max. {} sec) ...\n{}",
             systemReadyStatus.getOverallResult(), WAIT_INTERVAL_SEC, props.getSystemReadyWaitLimitSec(),
             systemReadyStatus.getFailureInfoString());
         sleep(WAIT_INTERVAL_SEC);

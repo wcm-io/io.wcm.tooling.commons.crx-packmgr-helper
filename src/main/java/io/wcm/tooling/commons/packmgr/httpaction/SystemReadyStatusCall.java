@@ -66,11 +66,17 @@ public final class SystemReadyStatusCall implements HttpCall<SystemReadyStatus> 
     try (CloseableHttpResponse response = httpClient.execute(method, context)) {
 
       String responseString = EntityUtils.toString(response.getEntity());
-      if (response.getStatusLine().getStatusCode() != HttpStatus.SC_OK) {
-        throw PackageManagerHttpActionException.forHttpError(systemReadyURL, response.getStatusLine(), responseString);
+      switch (response.getStatusLine().getStatusCode()) {
+        case HttpStatus.SC_OK:
+        case HttpStatus.SC_INTERNAL_SERVER_ERROR:
+        case HttpStatus.SC_SERVICE_UNAVAILABLE:
+          return toSystemReadyStatus(responseString, systemReadyURL);
+        case HttpStatus.SC_NOT_FOUND:
+          // AEM version that does not support system ready endpoint - accept as valid response
+          return new SystemReadyStatus(null, null);
+        default:
+          throw PackageManagerHttpActionException.forHttpError(systemReadyURL, response.getStatusLine(), responseString);
       }
-
-      return toSystemReadyStatus(responseString, systemReadyURL);
     }
     catch (IOException ex) {
       throw PackageManagerHttpActionException.forIOException(systemReadyURL, ex);

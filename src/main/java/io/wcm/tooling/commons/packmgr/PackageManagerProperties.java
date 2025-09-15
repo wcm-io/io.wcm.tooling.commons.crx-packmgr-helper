@@ -44,7 +44,7 @@ public final class PackageManagerProperties {
   private List<Pattern> bundleStatusBlacklistBundleNames = Collections.emptyList();
   private List<Pattern> bundleStatusWhitelistBundleNames = Collections.emptyList();
   private String systemReadyUrl;
-  private int systemReadyWaitLimitSec = 60;
+  private int systemReadyWaitLimitSec = 30;
   private String packageManagerInstallStatusURL;
   private int packageManagerInstallStatusWaitLimitSec = 360;
   private boolean relaxedSSLCheck;
