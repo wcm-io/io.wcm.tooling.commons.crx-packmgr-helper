@@ -24,6 +24,7 @@ import static io.wcm.tooling.commons.packmgr.PackageManagerHelper.CRX_PACKAGE_EX
 import java.io.File;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.json.JSONObject;
@@ -50,7 +51,7 @@ public class CrxPackageDownloader implements VendorPackageDownloader {
     String msg = jsonResponse.optString("msg", null);
     String packagePath = jsonResponse.optString("path", null);
     // package already exists - get path from error message and continue
-    if (!success && StringUtils.startsWith(msg, CRX_PACKAGE_EXISTS_ERROR_MESSAGE_PREFIX) && StringUtils.isEmpty(packagePath)) {
+    if (!success && Strings.CS.startsWith(msg, CRX_PACKAGE_EXISTS_ERROR_MESSAGE_PREFIX) && StringUtils.isEmpty(packagePath)) {
       packagePath = StringUtils.substringAfter(msg, CRX_PACKAGE_EXISTS_ERROR_MESSAGE_PREFIX);
       success = true;
     }

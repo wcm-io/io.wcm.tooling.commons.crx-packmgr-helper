@@ -27,6 +27,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.http.StatusLine;
 import org.json.JSONException;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+
 /**
  * Exception during package manager HTTP actions.
  */
@@ -74,6 +76,22 @@ public final class PackageManagerHttpActionException extends RuntimeException {
   @SuppressWarnings("PMD.UseStringBufferForStringAppends")
   public static PackageManagerHttpActionException forJSONException(String url,
       String responseString, JSONException ex) {
+    String message = "HTTP call to " + url + " failed: JSON parse failure - "
+        + ex.getMessage() + "\n"
+        + StringUtils.abbreviate(responseString, 200);
+    return new PackageManagerHttpActionException(message, ex);
+  }
+
+  /**
+   * Create exception instance for Jackson JSON processing exception.
+   * @param url HTTP url called
+   * @param responseString Response string
+   * @param ex Jackson JSON processing exception
+   * @return Exception instance
+   */
+  @SuppressWarnings("PMD.UseStringBufferForStringAppends")
+  public static PackageManagerHttpActionException forJSONException(String url,
+      String responseString, JsonProcessingException ex) {
     String message = "HTTP call to " + url + " failed: JSON parse failure - "
         + ex.getMessage() + "\n"
         + StringUtils.abbreviate(responseString, 200);

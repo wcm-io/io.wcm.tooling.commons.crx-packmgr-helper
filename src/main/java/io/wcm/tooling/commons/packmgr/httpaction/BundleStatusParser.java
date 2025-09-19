@@ -25,6 +25,7 @@ import java.util.Set;
 import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -99,15 +100,15 @@ final class BundleStatusParser {
   }
 
   private boolean isActive(String actual) {
-    return StringUtils.equalsIgnoreCase(actual, "Active");
+    return Strings.CI.equals(actual, "Active");
   }
 
   private boolean isResolved(String actual) {
-    return StringUtils.equalsIgnoreCase(actual, "Resolved");
+    return Strings.CI.equals(actual, "Resolved");
   }
 
   private boolean isInstalled(String actual) {
-    return StringUtils.equalsIgnoreCase(actual, "Installed");
+    return Strings.CI.equals(actual, "Installed");
   }
 
   private boolean isWhitelisted(String symbolicName) {

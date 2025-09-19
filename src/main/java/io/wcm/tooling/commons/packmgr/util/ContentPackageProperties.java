@@ -31,7 +31,7 @@ import java.util.TreeMap;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipFile;
 import org.apache.commons.lang3.BooleanUtils;
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.apache.commons.lang3.math.NumberUtils;
 
 /**
@@ -92,13 +92,13 @@ public final class ContentPackageProperties {
 
     // check for boolean
     boolean boolValue = BooleanUtils.toBoolean(valueString);
-    if (StringUtils.equals(valueString, Boolean.toString(boolValue))) {
+    if (Strings.CS.equals(valueString, Boolean.toString(boolValue))) {
       return boolValue;
     }
 
     // check for integer
     int intValue = NumberUtils.toInt(valueString);
-    if (StringUtils.equals(valueString, Integer.toString(intValue))) {
+    if (Strings.CS.equals(valueString, Integer.toString(intValue))) {
       return intValue;
     }
 

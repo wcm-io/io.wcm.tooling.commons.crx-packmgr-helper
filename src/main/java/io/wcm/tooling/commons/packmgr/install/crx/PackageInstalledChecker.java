@@ -23,6 +23,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -83,7 +84,7 @@ final class PackageInstalledChecker {
       String itemName = item.optString("name");
       String itemVersion = item.optString("version");
       long itemLastUnpacked = item.optLong("lastUnpacked", NOT_UNPACKED_DATE);
-      if (StringUtils.equals(group, itemGroup) && StringUtils.equals(name, itemName) && StringUtils.isNotBlank(itemVersion)) {
+      if (Strings.CS.equals(group, itemGroup) && Strings.CS.equals(name, itemName) && StringUtils.isNotBlank(itemVersion)) {
         map.put(itemVersion, itemLastUnpacked);
       }
     }

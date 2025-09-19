@@ -52,6 +52,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.apache.jackrabbit.JcrConstants;
 import org.apache.jackrabbit.util.ISO8601;
 import org.apache.jackrabbit.vault.fs.io.DocViewFormat;
@@ -160,8 +161,8 @@ public final class ContentUnpacker {
   }
 
   private boolean isJcrContentXmlFile(String name) {
-    return StringUtils.equalsIgnoreCase(FilenameUtils.getExtension(name), "xml")
-        && StringUtils.startsWith(name, "jcr_root/");
+    return Strings.CI.equals(FilenameUtils.getExtension(name), "xml")
+        && Strings.CS.startsWith(name, "jcr_root/");
   }
 
   /**
@@ -250,7 +251,7 @@ public final class ContentUnpacker {
         @Override
         public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
           // validate that XML file contains FileVault XML content
-          if (StringUtils.equals(uri, JCR_NAMESPACE.getURI()) && StringUtils.equals(localName, "root")) {
+          if (Strings.CS.equals(uri, JCR_NAMESPACE.getURI()) && Strings.CS.equals(localName, "root")) {
             foundRootElement.set(true);
           }
         }
@@ -302,7 +303,7 @@ public final class ContentUnpacker {
 
   static String getNamespacePrefix(String path) {
     String fileName = FilenameUtils.getName(path);
-    if (StringUtils.equals(DOT_CONTENT_XML, fileName)) {
+    if (Strings.CS.equals(DOT_CONTENT_XML, fileName)) {
       String parentFolderName = FilenameUtils.getName(FilenameUtils.getPathNoEndSeparator(path));
       if (parentFolderName != null) {
         String nodeName = PlatformNameFormat.getRepositoryName(parentFolderName);
@@ -316,12 +317,12 @@ public final class ContentUnpacker {
   }
 
   private String getParentPath(ZipArchiveEntry entry) {
-    return StringUtils.removeEnd(StringUtils.removeStart(entry.getName(), ROOT_DIR), "/" + DOT_CONTENT_XML);
+    return Strings.CS.removeEnd(Strings.CS.removeStart(entry.getName(), ROOT_DIR), "/" + DOT_CONTENT_XML);
   }
 
   private String buildElementPath(Element element, String parentPath) {
     StringBuilder path = new StringBuilder(parentPath);
-    if (!StringUtils.equals(element.getQualifiedName(), "jcr:root")) {
+    if (!Strings.CS.equals(element.getQualifiedName(), "jcr:root")) {
       path.append("/").append(element.getQualifiedName());
     }
     return path.toString();
@@ -338,18 +339,18 @@ public final class ContentUnpacker {
     collectNamespacePrefix(namespacePrefixesActuallyUsed, element.getNamespacePrefix());
 
     String jcrPrimaryType = element.getAttributeValue("primaryType", JCR_NAMESPACE);
-    boolean isRepositoryUserGroup = StringUtils.equals(jcrPrimaryType, "rep:User") || StringUtils.equals(jcrPrimaryType, "rep:Group");
-    boolean isReplicationElement = StringUtils.equals(jcrPrimaryType, "cq:Page")
-        || StringUtils.equals(jcrPrimaryType, "dam:Asset")
-        || StringUtils.equals(jcrPrimaryType, "cq:Template");
-    boolean isContent = insideReplicationElement && StringUtils.equals(element.getQualifiedName(), "jcr:content");
+    boolean isRepositoryUserGroup = Strings.CS.equals(jcrPrimaryType, "rep:User") || Strings.CS.equals(jcrPrimaryType, "rep:Group");
+    boolean isReplicationElement = Strings.CS.equals(jcrPrimaryType, "cq:Page")
+        || Strings.CS.equals(jcrPrimaryType, "dam:Asset")
+        || Strings.CS.equals(jcrPrimaryType, "cq:Template");
+    boolean isContent = insideReplicationElement && Strings.CS.equals(element.getQualifiedName(), "jcr:content");
     boolean setReplicationAttributes = isContent && markReplicationActivated;
 
     List<Attribute> attributes = new ArrayList<>(element.getAttributes());
     for (Attribute attribute : attributes) {
       boolean excluded = false;
       if (matches(attribute.getQualifiedName(), this.excludeProperties, false)) {
-        if (isRepositoryUserGroup && StringUtils.equals(attribute.getQualifiedName(), JcrConstants.JCR_UUID)) {
+        if (isRepositoryUserGroup && Strings.CS.equals(attribute.getQualifiedName(), JcrConstants.JCR_UUID)) {
           // keep jcr:uuid property for groups and users, otherwise they cannot be imported again
         }
         else {
@@ -357,11 +358,11 @@ public final class ContentUnpacker {
           excluded = true;
         }
       }
-      else if (StringUtils.equals(attribute.getQualifiedName(), PRIMARYTYPE_PROPERTY)) {
+      else if (Strings.CS.equals(attribute.getQualifiedName(), PRIMARYTYPE_PROPERTY)) {
         String namespacePrefix = StringUtils.substringBefore(attribute.getValue(), ":");
         collectNamespacePrefix(namespacePrefixesActuallyUsed, namespacePrefix);
       }
-      else if (StringUtils.equals(attribute.getQualifiedName(), MIXINS_PROPERTY)) {
+      else if (Strings.CS.equals(attribute.getQualifiedName(), MIXINS_PROPERTY)) {
         String filteredValue = filterMixinsPropertyValue(attribute.getValue(), namespacePrefixesActuallyUsed);
         if (StringUtils.isBlank(filteredValue)) {
           attribute.detach();
@@ -370,12 +371,12 @@ public final class ContentUnpacker {
           attribute.setValue(filteredValue);
         }
       }
-      else if (StringUtils.startsWith(attribute.getValue(), "{Name}")) {
+      else if (Strings.CS.startsWith(attribute.getValue(), "{Name}")) {
         collectNamespacePrefixNameArray(namespacePrefixesActuallyUsed, attribute.getValue());
         // alphabetically sort name values
         attribute.setValue(sortReferenceValues(attribute.getValue(), PropertyType.NAME));
       }
-      else if (StringUtils.startsWith(attribute.getValue(), "{WeakReference}")) {
+      else if (Strings.CS.startsWith(attribute.getValue(), "{WeakReference}")) {
         // alphabetically sort weak reference values
         attribute.setValue(sortReferenceValues(attribute.getValue(), PropertyType.WEAKREFERENCE));
       }
@@ -396,7 +397,7 @@ public final class ContentUnpacker {
     if (isReplicationElement && element.getChild("content", JCR_NAMESPACE) == null
         && matches(path + "/jcr:content", markReplicationActivatedIncludeNodes, true)) {
       Element contentNode = new Element("content", JCR_NAMESPACE);
-      String jcrContentPrimaryType = StringUtils.equals(jcrPrimaryType, "cq:Template") ? "cq:PageContent" : jcrPrimaryType + "Content";
+      String jcrContentPrimaryType = Strings.CS.equals(jcrPrimaryType, "cq:Template") ? "cq:PageContent" : jcrPrimaryType + "Content";
       contentNode.setAttribute("primaryType", jcrContentPrimaryType, JCR_NAMESPACE);
       element.addContent(contentNode);
     }
