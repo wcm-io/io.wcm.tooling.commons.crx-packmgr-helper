@@ -30,33 +30,14 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * POJO to map system ready JSON response to via Jackson.
+ * @param overallResult overall result
+ * @param results list of individual results
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
-public final class SystemReadyStatus {
-
-  private final String overallResult;
-  private final List<Result> results;
+public record SystemReadyStatus(@JsonProperty("overallResult") String overallResult,
+    @JsonProperty("results") List<Result> results) {
 
   private static final String STATUS_OK = "OK";
-
-  /**
-   * Constructor.
-   * @param overallResult overall result
-   * @param results list of individual results
-   */
-  public SystemReadyStatus(@JsonProperty("overallResult") String overallResult,
-      @JsonProperty("results") List<Result> results) {
-    this.overallResult = overallResult;
-    this.results = results;
-  }
-
-  public String getOverallResult() {
-    return overallResult;
-  }
-
-  public List<Result> getResults() {
-    return results;
-  }
 
   /**
    * Checks if the overall system ready status is OK.
@@ -77,14 +58,14 @@ public final class SystemReadyStatus {
     }
     StringBuilder sb = new StringBuilder();
     for (Result result : Optional.ofNullable(results).orElse(List.of())) {
-      if (!Strings.CI.equals(result.getStatus(), STATUS_OK)) {
-        sb.append("- ").append(result.getStatus()).append(": ").append(result.getName()).append("\n");
-        for (Message message : Optional.ofNullable(result.getMessages()).orElse(List.of())) {
+      if (!Strings.CI.equals(result.status(), STATUS_OK)) {
+        sb.append("- ").append(result.status()).append(": ").append(result.name()).append("\n");
+        for (Message message : Optional.ofNullable(result.messages()).orElse(List.of())) {
           String notOkStatus = "";
-          if (!Strings.CI.equals(message.getStatus(), STATUS_OK)) {
-            notOkStatus = message.getStatus() + ": ";
+          if (!Strings.CI.equals(message.status(), STATUS_OK)) {
+            notOkStatus = message.status() + ": ";
           }
-          sb.append("  * ").append(notOkStatus).append(message.getMessage()).append("\n");
+          sb.append("  * ").append(notOkStatus).append(message.message()).append("\n");
         }
       }
     }
@@ -93,93 +74,31 @@ public final class SystemReadyStatus {
 
   /**
    * Represents a single health check result.
+   * @param name name
+   * @param status status
+   * @param timeInMs time in ms
+   * @param finishedAt finished at
+   * @param tags tags
+   * @param messages messages
    */
   @JsonIgnoreProperties(ignoreUnknown = true)
-  public static final class Result {
-
-    private final String name;
-    private final String status;
-    private final long timeInMs;
-    private final String finishedAt;
-    private final List<String> tags;
-    private final List<Message> messages;
-
-    /**
-     * Constructor.
-     * @param name name
-     * @param status status
-     * @param timeInMs time in ms
-     * @param finishedAt finished at
-     * @param tags tags
-     * @param messages messages
-     */
-    public Result(@JsonProperty("name") String name,
-        @JsonProperty("status") String status,
-        @JsonProperty("timeInMs") long timeInMs,
-        @JsonProperty("finishedAt") String finishedAt,
-        @JsonProperty("tags") List<String> tags,
-        @JsonProperty("messages") List<Message> messages) {
-      this.name = name;
-      this.status = status;
-      this.timeInMs = timeInMs;
-      this.finishedAt = finishedAt;
-      this.tags = tags;
-      this.messages = messages;
-    }
-
-    public String getName() {
-      return name;
-    }
-
-    public String getStatus() {
-      return status;
-    }
-
-    public long getTimeInMs() {
-      return timeInMs;
-    }
-
-    public String getFinishedAt() {
-      return finishedAt;
-    }
-
-    public List<String> getTags() {
-      return tags;
-    }
-
-    public List<Message> getMessages() {
-      return messages;
-    }
+  public record Result(@JsonProperty("name") String name,
+      @JsonProperty("status") String status,
+      @JsonProperty("timeInMs") long timeInMs,
+      @JsonProperty("finishedAt") String finishedAt,
+      @JsonProperty("tags") List<String> tags,
+      @JsonProperty("messages") List<Message> messages) {
 
   }
 
   /**
    * Represents a message within a health check result.
+   * @param status status
+   * @param message message
    */
   @JsonIgnoreProperties(ignoreUnknown = true)
-  public static final class Message {
-
-    private final String status;
-    private final String message;
-
-    /**
-     * Constructor.
-     * @param status status
-     * @param message message
-     */
-    public Message(@JsonProperty("status") String status,
-        @JsonProperty("message") String message) {
-      this.status = status;
-      this.message = message;
-    }
-
-    public String getStatus() {
-      return status;
-    }
-
-    public String getMessage() {
-      return message;
-    }
+  public record Message(@JsonProperty("status") String status,
+      @JsonProperty("message") String message) {
 
   }
 

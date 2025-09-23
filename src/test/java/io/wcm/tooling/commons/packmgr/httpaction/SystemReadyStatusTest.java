@@ -48,11 +48,11 @@ class SystemReadyStatusTest {
 
       // Verify overall result
       assertNotNull(status);
-      assertEquals("OK", status.getOverallResult());
+      assertEquals("OK", status.overallResult());
 
       // Verify results list (do not check further details here)
-      assertNotNull(status.getResults());
-      assertEquals(6, status.getResults().size());
+      assertNotNull(status.results());
+      assertEquals(6, status.results().size());
 
       // Verify overall status
       assertTrue(status.isSystemReadyOK());
@@ -71,11 +71,11 @@ class SystemReadyStatusTest {
 
       // Verify overall result
       assertNotNull(status);
-      assertEquals("CRITICAL", status.getOverallResult());
+      assertEquals("CRITICAL", status.overallResult());
 
       // Verify results list (do not check further details here)
-      assertNotNull(status.getResults());
-      assertEquals(7, status.getResults().size());
+      assertNotNull(status.results());
+      assertEquals(7, status.results().size());
 
       // Verify overall status
       assertFalse(status.isSystemReadyOK());

@@ -25,84 +25,15 @@ import org.apache.commons.lang3.StringUtils;
 
 /**
  * Proxy definition - e.g. for maven proxy settings.
+ * @param id Proxy identifier
+ * @param protocol Protocol
+ * @param host Host
+ * @param port Port
+ * @param username User name
+ * @param password Password
+ * @param nonProxyHosts List of non-proxy hosts
  */
-public final class Proxy {
-
-  private final String id;
-  private final String protocol;
-  private final String host;
-  private final int port;
-  private final String username;
-  private final String password;
-  private final String nonProxyHosts;
-
-  /**
-   * @param id Proxy identifier
-   * @param protocol Protocol
-   * @param host Host
-   * @param port Port
-   * @param username User name
-   * @param password Password
-   * @param nonProxyHosts List of non-proxy hosts
-   */
-  public Proxy(String id, String protocol, String host, int port, String username, String password, String nonProxyHosts) {
-    this.host = host;
-    this.id = id;
-    this.protocol = protocol;
-    this.port = port;
-    this.username = username;
-    this.password = password;
-    this.nonProxyHosts = nonProxyHosts;
-  }
-
-  /**
-   * @return Proxy identifier
-   */
-  public String getId() {
-    return this.id;
-  }
-
-  /**
-   * @return Protocol
-   */
-  public String getProtocol() {
-    return this.protocol;
-  }
-
-  /**
-   * @return Host
-   */
-  public String getHost() {
-    return this.host;
-  }
-
-  /**
-   * @return Port
-   */
-  public int getPort() {
-    return this.port;
-  }
-
-  /**
-   * @return User name
-   */
-  public String getUsername() {
-    return this.username;
-  }
-
-  /**
-   * @return Password
-   */
-  public String getPassword() {
-    return this.password;
-  }
-
-  /**
-   * @return List of non-proxy hosts
-   */
-  public String getNonProxyHosts() {
-    return this.nonProxyHosts;
-  }
+public record Proxy(String id, String protocol, String host, int port, String username, String password, String nonProxyHosts) {
 
   boolean useAuthentication() {
     return username != null && !username.isEmpty();

@@ -24,39 +24,18 @@ import java.util.regex.Pattern;
 
 /**
  * Wrapper for Status summary from Web Console Bundles Status info JSON.
+ * @param statusLine Status Line from JSON string
+ * @param total Total bundles
+ * @param active Active bundles
+ * @param activeFragment Active fragment bundles
+ * @param resolved Resolved bundles
+ * @param installed Installed bundles
+ * @param ignored Ignored bundles
+ * @param bundleSymbolicNames Bundle symbolic names
  */
-public final class BundleStatus {
-
-  private final String statusLine;
-  private final int total;
-  private final int active;
-  private final int activeFragment;
-  private final int resolved;
-  private final int installed;
-  private final int ignored;
-  private final Set<String> bundleSymbolicNames;
-
-  BundleStatus(String statusLine, int total, int active, int activeFragment,
-      int resolved, int installed, int ignored,
-      Set<String> bundleSymbolicNames) {
-    this.statusLine = statusLine;
-    this.total = total;
-    this.active = active;
-    this.activeFragment = activeFragment;
-    this.resolved = resolved;
-    this.installed = installed;
-    this.ignored = ignored;
-    this.bundleSymbolicNames = bundleSymbolicNames;
-  }
-
-  /**
-   * @return Status Line from JSON string
-   * @deprecated Please use {@link #getStatusLineCompact()}
-   */
-  @Deprecated(since = "1.6.0")
-  public String getStatusLine() {
-    return this.statusLine;
-  }
+public record BundleStatus(String statusLine, int total, int active, int activeFragment,
+    int resolved, int installed, int ignored,
+    Set<String> bundleSymbolicNames) {
 
   /**
    * @return Compact version of status line.
@@ -83,52 +62,10 @@ public final class BundleStatus {
   }
 
   /**
-   * @return Total bundles
-   */
-  public int getTotal() {
-    return this.total;
-  }
-
-  /**
-   * @return Active bundles
-   */
-  public int getActive() {
-    return this.active;
-  }
-
-  /**
-   * @return Active fragments
-   */
-  public int getActiveFragment() {
-    return this.activeFragment;
-  }
-
-  /**
-   * @return Resolved bundles
-   */
-  public int getResolved() {
-    return this.resolved;
-  }
-
-  /**
-   * @return Installed bundles
-   */
-  public int getInstalled() {
-    return this.installed;
-  }
-
-  /**
-   * @return Ignored bundles
-   */
-  public int getIgnored() {
-    return ignored;
-  }
-
-  /**
    * @return true if no bundles are in "installed" or "resolved" state.
    */
   public boolean isAllBundlesRunning() {
-    return getInstalled() + getResolved() == 0;
+    return installed() + resolved() == 0;
   }
 
   /**

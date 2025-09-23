@@ -138,7 +138,7 @@ public final class PackageManagerHelper {
     // proxy support
     Proxy proxy = getProxyForUrl(props.getPackageManagerUrl());
     if (proxy != null) {
-      httpClientBuilder.setProxy(new HttpHost(proxy.getHost(), proxy.getPort(), proxy.getProtocol()));
+      httpClientBuilder.setProxy(new HttpHost(proxy.host(), proxy.port(), proxy.protocol()));
     }
 
     return httpClientBuilder.build();
@@ -196,8 +196,8 @@ public final class PackageManagerHelper {
     // proxy support
     Proxy proxy = getProxyForUrl(url);
     if (proxy != null && proxy.useAuthentication()) {
-      AuthScope proxyAuthScope = new AuthScope(proxy.getHost(), proxy.getPort());
-      Credentials proxyCredentials = new UsernamePasswordCredentials(proxy.getUsername(), proxy.getPassword());
+      AuthScope proxyAuthScope = new AuthScope(proxy.host(), proxy.port());
+      Credentials proxyCredentials = new UsernamePasswordCredentials(proxy.username(), proxy.password());
       credsProvider.setCredentials(proxyAuthScope, proxyCredentials);
     }
 
@@ -401,11 +401,11 @@ public final class PackageManagerHelper {
       // check if bundles are still stopping/staring
       if (!systemReadyStatus.isSystemReadyOK()) {
         if (lastTry) {
-          throw new PackageManagerException("System is NOT ready (" + systemReadyStatus.getOverallResult() + ") - package deployment failed.\n"
+          throw new PackageManagerException("System is NOT ready (" + systemReadyStatus.overallResult() + ") - package deployment failed.\n"
               + systemReadyStatus.getFailureInfoString());
         }
         log.warn("System is NOT ready ({}) - wait {} sec (max. {} sec) ...\n{}",
-            systemReadyStatus.getOverallResult(), WAIT_INTERVAL_SEC, props.getSystemReadyWaitLimitSec(),
+            systemReadyStatus.overallResult(), WAIT_INTERVAL_SEC, props.getSystemReadyWaitLimitSec(),
             systemReadyStatus.getFailureInfoString());
         sleep(WAIT_INTERVAL_SEC);
         systemReady = false;

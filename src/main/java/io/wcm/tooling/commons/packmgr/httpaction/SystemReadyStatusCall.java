@@ -67,9 +67,7 @@ public final class SystemReadyStatusCall implements HttpCall<SystemReadyStatus> 
 
       String responseString = EntityUtils.toString(response.getEntity());
       switch (response.getStatusLine().getStatusCode()) {
-        case HttpStatus.SC_OK:
-        case HttpStatus.SC_INTERNAL_SERVER_ERROR:
-        case HttpStatus.SC_SERVICE_UNAVAILABLE:
+        case HttpStatus.SC_OK, HttpStatus.SC_INTERNAL_SERVER_ERROR, HttpStatus.SC_SERVICE_UNAVAILABLE:
           return toSystemReadyStatus(responseString, systemReadyURL);
         case HttpStatus.SC_NOT_FOUND:
           // AEM version that does not support system ready endpoint - accept as valid response

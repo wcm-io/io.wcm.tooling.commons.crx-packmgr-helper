@@ -23,7 +23,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 /**
  * Configuration properties for {@link PackageManagerHelper}.
@@ -248,7 +247,7 @@ public final class PackageManagerProperties {
   public void setBundleStatusBlacklistBundleNames(List<String> bundleStatusBlacklistBundleNames) {
     this.bundleStatusBlacklistBundleNames = bundleStatusBlacklistBundleNames.stream()
         .map(Pattern::compile)
-        .collect(Collectors.toList());
+        .toList();
   }
 
   /**
@@ -266,7 +265,7 @@ public final class PackageManagerProperties {
   public void setBundleStatusWhitelistBundleNames(List<String> bundleStatusWhitelistBundleNames) {
     this.bundleStatusWhitelistBundleNames = bundleStatusWhitelistBundleNames.stream()
         .map(Pattern::compile)
-        .collect(Collectors.toList());
+        .toList();
   }
 
   /**

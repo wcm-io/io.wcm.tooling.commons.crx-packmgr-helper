@@ -45,12 +45,12 @@ class BundleStatusParserTest {
     BundleStatus status = getStatus("/bundlestatus/bundlelist_samples_resolved.json");
 
     assertEquals("597 total, 590 active, 4 fragment, 3 resolved", status.getStatusLineCompact());
-    assertEquals(597, status.getTotal());
-    assertEquals(590, status.getActive());
-    assertEquals(4, status.getActiveFragment());
-    assertEquals(3, status.getResolved());
-    assertEquals(0, status.getInstalled());
-    assertEquals(0, status.getIgnored());
+    assertEquals(597, status.total());
+    assertEquals(590, status.active());
+    assertEquals(4, status.activeFragment());
+    assertEquals(3, status.resolved());
+    assertEquals(0, status.installed());
+    assertEquals(0, status.ignored());
     assertTrue(status.containsBundle("io.wcm.samples.core"));
     assertTrue(status.containsBundle("com.adobe.granite.crxde-lite"));
     assertEquals("io.wcm.samples.core", status.getMatchingBundle(Pattern.compile("^io\\.wcm\\.samples\\.c.*$")));
@@ -62,12 +62,12 @@ class BundleStatusParserTest {
     BundleStatus status = getStatus("/bundlestatus/bundlelist_samples_resolved.json", DEFAULT_WHITELIST);
 
     assertEquals("597 total, 590 active, 4 fragment, 1 resolved, 2 ignored", status.getStatusLineCompact());
-    assertEquals(597, status.getTotal());
-    assertEquals(590, status.getActive());
-    assertEquals(4, status.getActiveFragment());
-    assertEquals(1, status.getResolved());
-    assertEquals(0, status.getInstalled());
-    assertEquals(2, status.getIgnored());
+    assertEquals(597, status.total());
+    assertEquals(590, status.active());
+    assertEquals(4, status.activeFragment());
+    assertEquals(1, status.resolved());
+    assertEquals(0, status.installed());
+    assertEquals(2, status.ignored());
     assertTrue(status.containsBundle("io.wcm.samples.core"));
     assertFalse(status.containsBundle("com.adobe.granite.crxde-lite"));
     assertEquals("io.wcm.samples.core", status.getMatchingBundle(Pattern.compile("^io\\.wcm\\.samples\\.c.*$")));
@@ -79,12 +79,12 @@ class BundleStatusParserTest {
     BundleStatus status = getStatus("/bundlestatus/bundlelist_samples_active.json", DEFAULT_WHITELIST);
 
     assertEquals("597 total, 591 active, 4 fragment, 2 ignored", status.getStatusLineCompact());
-    assertEquals(597, status.getTotal());
-    assertEquals(591, status.getActive());
-    assertEquals(4, status.getActiveFragment());
-    assertEquals(0, status.getResolved());
-    assertEquals(0, status.getInstalled());
-    assertEquals(2, status.getIgnored());
+    assertEquals(597, status.total());
+    assertEquals(591, status.active());
+    assertEquals(4, status.activeFragment());
+    assertEquals(0, status.resolved());
+    assertEquals(0, status.installed());
+    assertEquals(2, status.ignored());
     assertTrue(status.containsBundle("io.wcm.samples.core"));
     assertFalse(status.containsBundle("com.adobe.granite.crxde-lite"));
     assertEquals("io.wcm.samples.core", status.getMatchingBundle(Pattern.compile("^io\\.wcm\\.samples\\.c.*$")));
