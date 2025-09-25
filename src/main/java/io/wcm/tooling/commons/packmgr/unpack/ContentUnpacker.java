@@ -101,6 +101,7 @@ public final class ContentUnpacker {
   private final String dateLastReplicated;
 
   /**
+   * Constructor.
    * @param properties Configuration properties
    */
   public ContentUnpacker(ContentUnpackerProperties properties) {
