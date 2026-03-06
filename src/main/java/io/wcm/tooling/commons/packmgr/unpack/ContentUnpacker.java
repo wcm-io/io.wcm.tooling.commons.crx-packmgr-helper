@@ -249,6 +249,7 @@ public final class ContentUnpacker {
 
       final AtomicBoolean foundRootElement = new AtomicBoolean(false);
       DefaultHandler handler = new DefaultHandler() {
+
         @Override
         public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
           // validate that XML file contains FileVault XML content
@@ -256,6 +257,7 @@ public final class ContentUnpacker {
             foundRootElement.set(true);
           }
         }
+
         @Override
         public void startPrefixMapping(String prefix, String uri) throws SAXException {
           if (StringUtils.isNotBlank(prefix)) {
@@ -295,8 +297,8 @@ public final class ContentUnpacker {
     applyXmlExcludes(doc.getRootElement(), getParentPath(entry), namespacePrefixesActuallyUsed, false);
 
     XMLOutputter outputter = new XMLOutputter(Format.getPrettyFormat()
-        .setIndent("    ")
-        .setLineSeparator(LineSeparator.UNIX));
+      .setIndent("    ")
+      .setLineSeparator(LineSeparator.UNIX));
     outputter.setXMLOutputProcessor(new NamspaceOrderedXmlProcessor(namespacePrefixes, namespacePrefixesActuallyUsed));
     outputter.output(doc, outputStream);
     outputStream.flush();

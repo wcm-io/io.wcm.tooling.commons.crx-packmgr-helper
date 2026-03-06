@@ -101,7 +101,7 @@ public class CrxPackageInstaller implements VendorPackageInstaller {
     HttpPost post = new HttpPost(url + "/.json?cmd=upload");
     HttpClientUtil.applyRequestConfig(post, packageFile, props);
     MultipartEntityBuilder entityBuilder = MultipartEntityBuilder.create()
-        .addBinaryBody("package", packageFile.getFile());
+      .addBinaryBody("package", packageFile.getFile());
     if (force) {
       entityBuilder.addTextBody("force", "true");
     }

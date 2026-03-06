@@ -68,7 +68,7 @@ public class ComposumPackageInstaller implements VendorPackageInstaller {
     HttpPost post = new HttpPost(uploadUrl);
     HttpClientUtil.applyRequestConfig(post, packageFile, props);
     MultipartEntityBuilder entityBuilder = MultipartEntityBuilder.create()
-        .addBinaryBody("file", packageFile.getFile());
+      .addBinaryBody("file", packageFile.getFile());
     if (packageFile.isForce()) {
       entityBuilder.addTextBody("force", "true");
     }

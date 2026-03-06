@@ -33,6 +33,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
  * Exception during package manager HTTP actions.
  */
 public final class PackageManagerHttpActionException extends RuntimeException {
+
   private static final long serialVersionUID = 1L;
 
   /**

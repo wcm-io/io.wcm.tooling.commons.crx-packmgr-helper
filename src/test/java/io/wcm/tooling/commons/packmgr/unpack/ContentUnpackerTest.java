@@ -36,19 +36,19 @@ class ContentUnpackerTest {
   private static final File CONTENT_PACKAGE_TEST = new File("src/test/resources/unpack/content-package-test.zip");
 
   private static final String[] EXCLUDE_FILES = new String[] {
-    ".*/sling-ide-tooling/.*",
-    "^META-INF/.*"
+      ".*/sling-ide-tooling/.*",
+      "^META-INF/.*"
   };
   private static final String[] EXCLUDE_NODES = new String[] {
-    "^.*/scheduleday_0$"
+      "^.*/scheduleday_0$"
   };
   private static final String[] EXCLUDE_PROPERTIES = new String[] {
-    "jcr\\:created",
-    "jcr\\:createdBy",
-    "jcr\\:lastModified",
+      "jcr\\:created",
+      "jcr\\:createdBy",
+      "jcr\\:lastModified",
       "jcr\\:lastModifiedBy",
-    "cq\\:lastModified",
-    "cq\\:lastModifiedBy"
+      "cq\\:lastModified",
+      "cq\\:lastModifiedBy"
   };
 
   private ContentUnpackerProperties props;

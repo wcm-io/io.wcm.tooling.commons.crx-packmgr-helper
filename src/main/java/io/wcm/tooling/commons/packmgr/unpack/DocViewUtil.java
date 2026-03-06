@@ -70,8 +70,8 @@ final class DocViewUtil {
    */
   static String formatValues(List<String> values, int propertyType) {
     Value[] valueObjects = values.stream()
-        .map(value -> new MockValue(value, propertyType))
-        .toArray(size -> new Value[size]);
+      .map(value -> new MockValue(value, propertyType))
+      .toArray(size -> new Value[size]);
     try {
       return DocViewProperty2.fromValues(DUMMY_NAME, valueObjects, propertyType, true, false, false).formatValue();
     }
@@ -82,6 +82,7 @@ final class DocViewUtil {
 
 
   private static final Name DUMMY_NAME = new Name() {
+
     private static final long serialVersionUID = 1L;
 
     @Override
