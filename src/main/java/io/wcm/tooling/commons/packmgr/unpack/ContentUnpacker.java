@@ -27,6 +27,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Enumeration;
@@ -48,9 +49,7 @@ import javax.xml.parsers.SAXParserFactory;
 
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipFile;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Strings;
 import org.apache.jackrabbit.JcrConstants;
@@ -172,12 +171,17 @@ public final class ContentUnpacker {
    * @param outputDirectory Output directory
    */
   public void unpack(File file, File outputDirectory) {
+    Path outputDirectoryPath = outputDirectory.toPath();
+    long entryCount = 0;
+    long totalBytes = 0;
     try (ZipFile zipFile = new ZipFile.Builder().setFile(file).get()) {
       Enumeration<ZipArchiveEntry> entries = zipFile.getEntries();
       while (entries.hasMoreElements()) {
         ZipArchiveEntry entry = entries.nextElement();
         if (!matches(entry.getName(), excludeFiles, false)) {
-          unpackEntry(zipFile, entry, outputDirectory);
+          entryCount++;
+          SafeExtract.checkEntryCount(entryCount);
+          totalBytes = unpackEntry(zipFile, entry, outputDirectoryPath, totalBytes);
         }
       }
     }
@@ -187,10 +191,12 @@ public final class ContentUnpacker {
   }
 
   @SuppressWarnings("java:S3776") // complexity
-  private void unpackEntry(ZipFile zipFile, ZipArchiveEntry entry, File outputDirectory) throws IOException {
+  private long unpackEntry(ZipFile zipFile, ZipArchiveEntry entry, Path outputDirectory, long bytesWrittenSoFar) throws IOException {
+    // resolve safely against the base directory (mitigates zip slip)
+    Path entryPath = SafeExtract.resolveSafely(outputDirectory, entry.getName());
     if (entry.isDirectory()) {
-      File directory = FileUtils.getFile(outputDirectory, entry.getName());
-      Files.createDirectories(directory.toPath());
+      Files.createDirectories(entryPath);
+      return bytesWrittenSoFar;
     }
     else {
       Set<String> namespacePrefixes = null;
@@ -198,15 +204,17 @@ public final class ContentUnpacker {
         namespacePrefixes = getNamespacePrefixes(zipFile, entry);
       }
 
+      long totalBytes = bytesWrittenSoFar;
       try (InputStream entryStream = zipFile.getInputStream(entry)) {
-        File outputFile = FileUtils.getFile(outputDirectory, entry.getName());
-        Files.deleteIfExists(outputFile.toPath());
-        File directory = outputFile.getParentFile();
-        Files.createDirectories(directory.toPath());
+        Files.deleteIfExists(entryPath);
+        Path directory = entryPath.getParent();
+        if (directory != null) {
+          Files.createDirectories(directory);
+        }
 
-        try (OutputStream fos = Files.newOutputStream(outputFile.toPath())) {
+        try (OutputStream fos = Files.newOutputStream(entryPath)) {
           if (applyXmlExcludes(entry.getName()) && namespacePrefixes != null) {
-            // write file with XML filtering
+            // write file with XML filtering (size limit not enforced for filtered XML, but XML files are small)
             try {
               writeXmlWithExcludes(entry, entryStream, fos, namespacePrefixes);
             }
@@ -215,12 +223,13 @@ public final class ContentUnpacker {
             }
           }
           else {
-            // write file directly without XML filtering
-            IOUtils.copy(entryStream, fos);
+            // write file directly without XML filtering, enforce size limit (mitigates zip bomb)
+            totalBytes = SafeExtract.copyWithLimit(entryStream, fos, totalBytes);
           }
         }
         if (isJcrContentXmlFile(entry.getName())) {
           // format output file using DocView format
+          File outputFile = entryPath.toFile();
           try {
             DOCVIEWFORMAT.format(outputFile, false);
           }
@@ -229,6 +238,7 @@ public final class ContentUnpacker {
           }
         }
       }
+      return totalBytes;
     }
   }
 
