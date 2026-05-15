@@ -37,7 +37,6 @@ import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.wcm.tooling.commons.packmgr.PackageManagerException;
 import io.wcm.tooling.commons.packmgr.PackageManagerHelper;
 import io.wcm.tooling.commons.packmgr.PackageManagerProperties;
@@ -89,7 +88,6 @@ public final class PackageDownloader implements Closeable {
    *          include the latest content from repository.
    * @return Downloaded content package file
    */
-  @SuppressFBWarnings("RV_RETURN_VALUE_IGNORED_BAD_PRACTICE")
   public File downloadContentPackage(String packagePath, String ouputFilePath, boolean rebuildPackage) {
     try {
       HttpClientContext httpClientContext = pkgmgr.getPackageManagerHttpClientContext();
