@@ -40,6 +40,7 @@ final class BundleStatusParser {
     this.bundleStatusWhitelistBundleNames = bundleStatusWhitelistBundleNames;
   }
 
+  @SuppressWarnings("java:S3776") // complexity
   BundleStatus parse(String jsonString) {
     JSONObject json = new JSONObject(jsonString);
 

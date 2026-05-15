@@ -63,6 +63,7 @@ public class CrxPackageInstaller implements VendorPackageInstaller {
   }
 
   @Override
+  @SuppressWarnings("java:S3776") // complexity
   public void installPackage(PackageFile packageFile, boolean replicate, PackageManagerHelper pkgmgr,
       CloseableHttpClient httpClient, HttpClientContext packageManagerHttpClientContext, HttpClientContext consoleHttpClientContext,
       PackageManagerProperties props) throws IOException, PackageManagerException {
@@ -174,7 +175,7 @@ public class CrxPackageInstaller implements VendorPackageInstaller {
         Thread.sleep(seconds * 1000L);
       }
       catch (InterruptedException ex) {
-        // ignore
+        Thread.currentThread().interrupt();
       }
     }
   }

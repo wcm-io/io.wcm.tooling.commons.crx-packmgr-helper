@@ -254,7 +254,7 @@ public final class PackageManagerHelper {
             Thread.sleep(props.getRetryDelaySec() * DateUtils.MILLIS_PER_SECOND);
           }
           catch (InterruptedException ex1) {
-            // ignore
+            Thread.currentThread().interrupt();
           }
         }
         return executeHttpCallWithRetry(call, runCount + 1);
@@ -462,7 +462,7 @@ public final class PackageManagerHelper {
       Thread.sleep(sec * DateUtils.MILLIS_PER_SECOND);
     }
     catch (InterruptedException e) {
-      // ignore
+      Thread.currentThread().interrupt();
     }
   }
 

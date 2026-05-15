@@ -68,6 +68,9 @@ class NamspaceOrderedXmlProcessor extends AbstractXMLOutputProcessor {
    *           if the destination Writer fails
    */
   @Override
+  @SuppressWarnings({
+      "java:S3776", "java:S6541" // complexity
+  })
   protected void printElement(final Writer out, final FormatStack fstack,
       final NamespaceStack nstack, final Element element) throws IOException {
 

@@ -66,6 +66,7 @@ import org.jdom2.input.SAXBuilder;
 import org.jdom2.output.Format;
 import org.jdom2.output.LineSeparator;
 import org.jdom2.output.XMLOutputter;
+import org.jetbrains.annotations.Nullable;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
@@ -187,6 +188,7 @@ public final class ContentUnpacker {
   }
 
   @SuppressFBWarnings("RV_RETURN_VALUE_IGNORED_BAD_PRACTICE")
+  @SuppressWarnings("java:S3776") // complexity
   private void unpackEntry(ZipFile zipFile, ZipArchiveEntry entry, File outputDirectory) throws IOException {
     if (entry.isDirectory()) {
       File directory = FileUtils.getFile(outputDirectory, entry.getName());
@@ -242,7 +244,7 @@ public final class ContentUnpacker {
    * @return Ordered set with namespace prefixes in correct order.
    *         Returns null if given XML file does not contain FileVault XML content.
    */
-  private Set<String> getNamespacePrefixes(ZipFile zipFile, ZipArchiveEntry entry) throws IOException {
+  private @Nullable Set<String> getNamespacePrefixes(ZipFile zipFile, ZipArchiveEntry entry) throws IOException {
     try (InputStream entryStream = zipFile.getInputStream(entry)) {
       SAXParser parser = SAX_PARSER_FACTORY.newSAXParser();
       final Set<String> prefixes = new LinkedHashSet<>();
@@ -331,7 +333,10 @@ public final class ContentUnpacker {
     return path.toString();
   }
 
-  @SuppressWarnings("PMD.EmptyControlStatement")
+  @SuppressWarnings({
+      "PMD.EmptyControlStatement",
+      "java:S3776", "java:S6541" // complexity
+  })
   private void applyXmlExcludes(Element element, String parentPath, Set<String> namespacePrefixesActuallyUsed,
       boolean insideReplicationElement) {
     String path = buildElementPath(element, parentPath);
