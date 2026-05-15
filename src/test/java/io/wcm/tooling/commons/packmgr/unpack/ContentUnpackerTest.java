@@ -150,8 +150,9 @@ class ContentUnpackerTest {
     Files.createDirectories(target);
 
     underTest = new ContentUnpacker(props);
+    File targetFile = target.toFile();
     PackageManagerException ex = assertThrows(PackageManagerException.class,
-        () -> underTest.unpack(archive, target.toFile()));
+        () -> underTest.unpack(archive, targetFile));
     assertTrue(ex.getCause() instanceof IOException);
     assertTrue(ex.getCause().getMessage().contains("outside of the target directory"));
     // No file written outside target
@@ -177,8 +178,9 @@ class ContentUnpackerTest {
     Files.createDirectories(target);
 
     underTest = new ContentUnpacker(props);
+    File targetFile = target.toFile();
     PackageManagerException ex = assertThrows(PackageManagerException.class,
-        () -> underTest.unpack(archive, target.toFile()));
+        () -> underTest.unpack(archive, targetFile));
     assertTrue(ex.getCause() instanceof IOException);
     assertTrue(ex.getCause().getMessage().contains("possible zip bomb"));
   }
