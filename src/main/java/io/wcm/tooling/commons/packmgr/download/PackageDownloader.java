@@ -21,9 +21,10 @@ package io.wcm.tooling.commons.packmgr.download;
 
 import java.io.Closeable;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
+import java.nio.file.Files;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpStatus;
@@ -118,12 +119,10 @@ public final class PackageDownloader implements Closeable {
 
           // delete existing file
           File outputFileObject = new File(ouputFilePath);
-          if (outputFileObject.exists()) {
-            outputFileObject.delete();
-          }
+          Files.deleteIfExists(outputFileObject.toPath());
 
           // write response file
-          try (FileOutputStream fos = new FileOutputStream(outputFileObject)) {
+          try (OutputStream fos = Files.newOutputStream(outputFileObject.toPath())) {
             IOUtils.copy(responseStream, fos);
             fos.flush();
             responseStream.close();

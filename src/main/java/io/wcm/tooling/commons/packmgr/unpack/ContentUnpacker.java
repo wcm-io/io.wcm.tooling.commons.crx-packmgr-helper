@@ -23,10 +23,10 @@ import static org.apache.jackrabbit.vault.util.Constants.DOT_CONTENT_XML;
 import static org.apache.jackrabbit.vault.util.Constants.ROOT_DIR;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Enumeration;
@@ -71,7 +71,6 @@ import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.wcm.tooling.commons.packmgr.PackageManagerException;
 
 /**
@@ -187,12 +186,11 @@ public final class ContentUnpacker {
     }
   }
 
-  @SuppressFBWarnings("RV_RETURN_VALUE_IGNORED_BAD_PRACTICE")
   @SuppressWarnings("java:S3776") // complexity
   private void unpackEntry(ZipFile zipFile, ZipArchiveEntry entry, File outputDirectory) throws IOException {
     if (entry.isDirectory()) {
       File directory = FileUtils.getFile(outputDirectory, entry.getName());
-      directory.mkdirs();
+      Files.createDirectories(directory.toPath());
     }
     else {
       Set<String> namespacePrefixes = null;
@@ -202,13 +200,11 @@ public final class ContentUnpacker {
 
       try (InputStream entryStream = zipFile.getInputStream(entry)) {
         File outputFile = FileUtils.getFile(outputDirectory, entry.getName());
-        if (outputFile.exists()) {
-          outputFile.delete();
-        }
+        Files.deleteIfExists(outputFile.toPath());
         File directory = outputFile.getParentFile();
-        directory.mkdirs();
+        Files.createDirectories(directory.toPath());
 
-        try (FileOutputStream fos = new FileOutputStream(outputFile)) {
+        try (OutputStream fos = Files.newOutputStream(outputFile.toPath())) {
           if (applyXmlExcludes(entry.getName()) && namespacePrefixes != null) {
             // write file with XML filtering
             try {
