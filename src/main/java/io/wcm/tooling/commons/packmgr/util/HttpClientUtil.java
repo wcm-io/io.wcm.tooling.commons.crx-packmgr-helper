@@ -42,9 +42,9 @@ public final class HttpClientUtil {
    */
   public static RequestConfig buildRequestConfig(PackageManagerProperties props) {
     return RequestConfig.custom()
-        .setConnectTimeout(props.getHttpConnectTimeoutSec() * (int)DateUtils.MILLIS_PER_SECOND)
-        .setSocketTimeout(props.getHttpSocketTimeoutSec() * (int)DateUtils.MILLIS_PER_SECOND)
-        .build();
+      .setConnectTimeout(props.getHttpConnectTimeoutSec() * (int)DateUtils.MILLIS_PER_SECOND)
+      .setSocketTimeout(props.getHttpSocketTimeoutSec() * (int)DateUtils.MILLIS_PER_SECOND)
+      .build();
   }
 
   /**
@@ -62,8 +62,8 @@ public final class HttpClientUtil {
     // apply specific timeout settings configured for this package file
     RequestConfig defaultConfig = buildRequestConfig(props);
     httpRequest.setConfig(RequestConfig.copy(defaultConfig)
-        .setSocketTimeout(httpSocketTimeoutSec * (int)DateUtils.MILLIS_PER_SECOND)
-        .build());
+      .setSocketTimeout(httpSocketTimeoutSec * (int)DateUtils.MILLIS_PER_SECOND)
+      .build());
   }
 
 }

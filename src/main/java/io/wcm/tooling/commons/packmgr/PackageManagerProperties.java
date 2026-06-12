@@ -246,8 +246,8 @@ public final class PackageManagerProperties {
    */
   public void setBundleStatusBlacklistBundleNames(List<String> bundleStatusBlacklistBundleNames) {
     this.bundleStatusBlacklistBundleNames = bundleStatusBlacklistBundleNames.stream()
-        .map(Pattern::compile)
-        .toList();
+      .map(Pattern::compile)
+      .toList();
   }
 
   /**
@@ -264,8 +264,8 @@ public final class PackageManagerProperties {
    */
   public void setBundleStatusWhitelistBundleNames(List<String> bundleStatusWhitelistBundleNames) {
     this.bundleStatusWhitelistBundleNames = bundleStatusWhitelistBundleNames.stream()
-        .map(Pattern::compile)
-        .toList();
+      .map(Pattern::compile)
+      .toList();
   }
 
   /**

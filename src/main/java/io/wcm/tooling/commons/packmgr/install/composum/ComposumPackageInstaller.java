@@ -53,6 +53,7 @@ public class ComposumPackageInstaller implements VendorPackageInstaller {
   }
 
   @Override
+  @SuppressWarnings("java:S125") // accept commented out code here
   public void installPackage(PackageFile packageFile, boolean replicate, PackageManagerHelper pkgmgr,
       CloseableHttpClient httpClient, HttpClientContext packageManagerHttpClientContext, HttpClientContext consoleHttpClientContext,
       PackageManagerProperties props) throws IOException, PackageManagerException {
@@ -68,7 +69,7 @@ public class ComposumPackageInstaller implements VendorPackageInstaller {
     HttpPost post = new HttpPost(uploadUrl);
     HttpClientUtil.applyRequestConfig(post, packageFile, props);
     MultipartEntityBuilder entityBuilder = MultipartEntityBuilder.create()
-        .addBinaryBody("file", packageFile.getFile());
+      .addBinaryBody("file", packageFile.getFile());
     if (packageFile.isForce()) {
       entityBuilder.addTextBody("force", "true");
     }
@@ -121,7 +122,7 @@ public class ComposumPackageInstaller implements VendorPackageInstaller {
         Thread.sleep(seconds * 1000L);
       }
       catch (InterruptedException ex) {
-        // ignore
+        Thread.currentThread().interrupt();
       }
     }
   }

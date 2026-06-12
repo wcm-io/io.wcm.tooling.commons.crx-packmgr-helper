@@ -156,5 +156,5 @@ public final class VendorInstallerFactory {
     }
     return answer;
   }
-  
+
 }

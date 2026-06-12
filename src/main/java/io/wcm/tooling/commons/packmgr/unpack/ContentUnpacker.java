@@ -23,10 +23,11 @@ import static org.apache.jackrabbit.vault.util.Constants.DOT_CONTENT_XML;
 import static org.apache.jackrabbit.vault.util.Constants.ROOT_DIR;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Enumeration;
@@ -48,9 +49,7 @@ import javax.xml.parsers.SAXParserFactory;
 
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipFile;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Strings;
 import org.apache.jackrabbit.JcrConstants;
@@ -66,11 +65,11 @@ import org.jdom2.input.SAXBuilder;
 import org.jdom2.output.Format;
 import org.jdom2.output.LineSeparator;
 import org.jdom2.output.XMLOutputter;
+import org.jetbrains.annotations.Nullable;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.wcm.tooling.commons.packmgr.PackageManagerException;
 
 /**
@@ -172,12 +171,17 @@ public final class ContentUnpacker {
    * @param outputDirectory Output directory
    */
   public void unpack(File file, File outputDirectory) {
+    Path outputDirectoryPath = outputDirectory.toPath();
+    long entryCount = 0;
+    long totalBytes = 0;
     try (ZipFile zipFile = new ZipFile.Builder().setFile(file).get()) {
       Enumeration<ZipArchiveEntry> entries = zipFile.getEntries();
       while (entries.hasMoreElements()) {
         ZipArchiveEntry entry = entries.nextElement();
         if (!matches(entry.getName(), excludeFiles, false)) {
-          unpackEntry(zipFile, entry, outputDirectory);
+          entryCount++;
+          SafeExtract.checkEntryCount(entryCount);
+          totalBytes = unpackEntry(zipFile, entry, outputDirectoryPath, totalBytes);
         }
       }
     }
@@ -186,11 +190,13 @@ public final class ContentUnpacker {
     }
   }
 
-  @SuppressFBWarnings("RV_RETURN_VALUE_IGNORED_BAD_PRACTICE")
-  private void unpackEntry(ZipFile zipFile, ZipArchiveEntry entry, File outputDirectory) throws IOException {
+  @SuppressWarnings("java:S3776") // complexity
+  private long unpackEntry(ZipFile zipFile, ZipArchiveEntry entry, Path outputDirectory, long bytesWrittenSoFar) throws IOException {
+    // resolve safely against the base directory (mitigates zip slip)
+    Path entryPath = SafeExtract.resolveSafely(outputDirectory, entry.getName());
     if (entry.isDirectory()) {
-      File directory = FileUtils.getFile(outputDirectory, entry.getName());
-      directory.mkdirs();
+      Files.createDirectories(entryPath);
+      return bytesWrittenSoFar;
     }
     else {
       Set<String> namespacePrefixes = null;
@@ -198,17 +204,17 @@ public final class ContentUnpacker {
         namespacePrefixes = getNamespacePrefixes(zipFile, entry);
       }
 
+      long totalBytes = bytesWrittenSoFar;
       try (InputStream entryStream = zipFile.getInputStream(entry)) {
-        File outputFile = FileUtils.getFile(outputDirectory, entry.getName());
-        if (outputFile.exists()) {
-          outputFile.delete();
+        Files.deleteIfExists(entryPath);
+        Path directory = entryPath.getParent();
+        if (directory != null) {
+          Files.createDirectories(directory);
         }
-        File directory = outputFile.getParentFile();
-        directory.mkdirs();
 
-        try (FileOutputStream fos = new FileOutputStream(outputFile)) {
+        try (OutputStream fos = Files.newOutputStream(entryPath)) {
           if (applyXmlExcludes(entry.getName()) && namespacePrefixes != null) {
-            // write file with XML filtering
+            // write file with XML filtering (size limit not enforced for filtered XML, but XML files are small)
             try {
               writeXmlWithExcludes(entry, entryStream, fos, namespacePrefixes);
             }
@@ -217,12 +223,13 @@ public final class ContentUnpacker {
             }
           }
           else {
-            // write file directly without XML filtering
-            IOUtils.copy(entryStream, fos);
+            // write file directly without XML filtering, enforce size limit (mitigates zip bomb)
+            totalBytes = SafeExtract.copyWithLimit(entryStream, fos, totalBytes);
           }
         }
         if (isJcrContentXmlFile(entry.getName())) {
           // format output file using DocView format
+          File outputFile = entryPath.toFile();
           try {
             DOCVIEWFORMAT.format(outputFile, false);
           }
@@ -231,6 +238,7 @@ public final class ContentUnpacker {
           }
         }
       }
+      return totalBytes;
     }
   }
 
@@ -242,13 +250,14 @@ public final class ContentUnpacker {
    * @return Ordered set with namespace prefixes in correct order.
    *         Returns null if given XML file does not contain FileVault XML content.
    */
-  private Set<String> getNamespacePrefixes(ZipFile zipFile, ZipArchiveEntry entry) throws IOException {
+  private @Nullable Set<String> getNamespacePrefixes(ZipFile zipFile, ZipArchiveEntry entry) throws IOException {
     try (InputStream entryStream = zipFile.getInputStream(entry)) {
       SAXParser parser = SAX_PARSER_FACTORY.newSAXParser();
       final Set<String> prefixes = new LinkedHashSet<>();
 
       final AtomicBoolean foundRootElement = new AtomicBoolean(false);
       DefaultHandler handler = new DefaultHandler() {
+
         @Override
         public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
           // validate that XML file contains FileVault XML content
@@ -256,6 +265,7 @@ public final class ContentUnpacker {
             foundRootElement.set(true);
           }
         }
+
         @Override
         public void startPrefixMapping(String prefix, String uri) throws SAXException {
           if (StringUtils.isNotBlank(prefix)) {
@@ -295,8 +305,8 @@ public final class ContentUnpacker {
     applyXmlExcludes(doc.getRootElement(), getParentPath(entry), namespacePrefixesActuallyUsed, false);
 
     XMLOutputter outputter = new XMLOutputter(Format.getPrettyFormat()
-        .setIndent("    ")
-        .setLineSeparator(LineSeparator.UNIX));
+      .setIndent("    ")
+      .setLineSeparator(LineSeparator.UNIX));
     outputter.setXMLOutputProcessor(new NamspaceOrderedXmlProcessor(namespacePrefixes, namespacePrefixesActuallyUsed));
     outputter.output(doc, outputStream);
     outputStream.flush();
@@ -329,7 +339,10 @@ public final class ContentUnpacker {
     return path.toString();
   }
 
-  @SuppressWarnings("PMD.EmptyControlStatement")
+  @SuppressWarnings({
+      "PMD.EmptyControlStatement",
+      "java:S3776", "java:S6541" // complexity
+  })
   private void applyXmlExcludes(Element element, String parentPath, Set<String> namespacePrefixesActuallyUsed,
       boolean insideReplicationElement) {
     String path = buildElementPath(element, parentPath);

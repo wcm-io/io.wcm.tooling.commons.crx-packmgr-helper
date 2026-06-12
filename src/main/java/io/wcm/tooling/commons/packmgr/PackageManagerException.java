@@ -23,6 +23,7 @@ package io.wcm.tooling.commons.packmgr;
  * Exception during package manager handling.
  */
 public final class PackageManagerException extends RuntimeException {
+
   private static final long serialVersionUID = 1L;
 
   /**

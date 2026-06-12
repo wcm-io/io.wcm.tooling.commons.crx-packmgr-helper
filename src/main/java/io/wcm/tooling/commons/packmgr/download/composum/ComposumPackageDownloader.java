@@ -47,8 +47,8 @@ public class ComposumPackageDownloader implements VendorPackageDownloader {
     String uploadUrl = baseUrl + "upload.json";
     HttpPost post = new HttpPost(uploadUrl);
     MultipartEntityBuilder entityBuilder = MultipartEntityBuilder.create()
-        .addBinaryBody("file", file)
-        .addTextBody("force", "true");
+      .addBinaryBody("file", file)
+      .addTextBody("force", "true");
     post.setEntity(entityBuilder.build());
     // execute post
     JSONObject jsonResponse = pkgmgr.executePackageManagerMethodJson(pkgmgr.getHttpClient(), pkgmgr.getPackageManagerHttpClientContext(), post);

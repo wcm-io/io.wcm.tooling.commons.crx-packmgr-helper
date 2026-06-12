@@ -32,7 +32,7 @@ public interface VendorPackageDownloader {
 
   /**
    * Upload the given local package definition (without actually installing it).
-   * @param packageManagerUrl  URL of he manager service
+   * @param packageManagerUrl URL of he manager service
    * @param file Package definition file
    * @param pkgmgr Helper for http connections
    * @return Package path

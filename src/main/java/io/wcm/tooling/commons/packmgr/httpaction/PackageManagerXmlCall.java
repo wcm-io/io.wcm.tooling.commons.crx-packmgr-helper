@@ -60,6 +60,7 @@ public final class PackageManagerXmlCall implements HttpCall<Document> {
   }
 
   @Override
+  @SuppressWarnings("java:S1141") // nested try block
   public Document execute() {
     log.debug("Call URL: {}", method.getURI());
 

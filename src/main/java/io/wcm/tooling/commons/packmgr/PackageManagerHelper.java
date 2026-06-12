@@ -104,24 +104,25 @@ public final class PackageManagerHelper {
    */
   public @NotNull CloseableHttpClient getHttpClient() {
     HttpClientBuilder httpClientBuilder = HttpClients.custom()
-        // keep reusing connections to a minimum - may conflict when instance is restarting and responds in unexpected manner
-        .setKeepAliveStrategy((response, context) -> 1)
-        .addInterceptorFirst(new HttpRequestInterceptor() {
-          @Override
-          public void process(HttpRequest request, HttpContext context) throws HttpException, IOException {
-            Credentials credentials = (Credentials)context.getAttribute(HTTP_CONTEXT_ATTRIBUTE_PREEMPTIVE_AUTHENTICATION_CREDS);
-            if (credentials != null) {
-              // enable preemptive authentication
-              AuthState authState = (AuthState)context.getAttribute(HttpClientContext.TARGET_AUTH_STATE);
-              authState.update(new BasicScheme(), credentials);
-            }
-            String oauth2AccessToken = (String)context.getAttribute(HTTP_CONTEXT_ATTRIBUTE_OAUTH2_ACCESS_TOKEN);
-            if (oauth2AccessToken != null) {
-              // send OAuth 2 bearer token
-              request.setHeader("Authorization", "Bearer " + oauth2AccessToken);
-            }
+      // keep reusing connections to a minimum - may conflict when instance is restarting and responds in unexpected manner
+      .setKeepAliveStrategy((response, context) -> 1)
+      .addInterceptorFirst(new HttpRequestInterceptor() {
+
+        @Override
+        public void process(HttpRequest request, HttpContext context) throws HttpException, IOException {
+          Credentials credentials = (Credentials)context.getAttribute(HTTP_CONTEXT_ATTRIBUTE_PREEMPTIVE_AUTHENTICATION_CREDS);
+          if (credentials != null) {
+            // enable preemptive authentication
+            AuthState authState = (AuthState)context.getAttribute(HttpClientContext.TARGET_AUTH_STATE);
+            authState.update(new BasicScheme(), credentials);
           }
-        });
+          String oauth2AccessToken = (String)context.getAttribute(HTTP_CONTEXT_ATTRIBUTE_OAUTH2_ACCESS_TOKEN);
+          if (oauth2AccessToken != null) {
+            // send OAuth 2 bearer token
+            request.setHeader("Authorization", "Bearer " + oauth2AccessToken);
+          }
+        }
+      });
 
     // relaxed SSL check
     if (props.isRelaxedSSLCheck()) {
@@ -253,7 +254,7 @@ public final class PackageManagerHelper {
             Thread.sleep(props.getRetryDelaySec() * DateUtils.MILLIS_PER_SECOND);
           }
           catch (InterruptedException ex1) {
-            // ignore
+            Thread.currentThread().interrupt();
           }
         }
         return executeHttpCallWithRetry(call, runCount + 1);
@@ -461,7 +462,7 @@ public final class PackageManagerHelper {
       Thread.sleep(sec * DateUtils.MILLIS_PER_SECOND);
     }
     catch (InterruptedException e) {
-      // ignore
+      Thread.currentThread().interrupt();
     }
   }
 

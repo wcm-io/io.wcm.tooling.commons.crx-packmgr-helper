@@ -89,8 +89,7 @@ class SystemReadyStatusTest {
 
     assertThrows(
         PackageManagerHttpActionException.class,
-        () -> SystemReadyStatusCall.toSystemReadyStatus(invalidJson, null)
-    );
+        () -> SystemReadyStatusCall.toSystemReadyStatus(invalidJson, null));
   }
 
   @Test

@@ -21,9 +21,10 @@ package io.wcm.tooling.commons.packmgr.download;
 
 import java.io.Closeable;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
+import java.nio.file.Files;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpStatus;
@@ -36,7 +37,6 @@ import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.wcm.tooling.commons.packmgr.PackageManagerException;
 import io.wcm.tooling.commons.packmgr.PackageManagerHelper;
 import io.wcm.tooling.commons.packmgr.PackageManagerProperties;
@@ -88,7 +88,6 @@ public final class PackageDownloader implements Closeable {
    *          include the latest content from repository.
    * @return Downloaded content package file
    */
-  @SuppressFBWarnings("RV_RETURN_VALUE_IGNORED_BAD_PRACTICE")
   public File downloadContentPackage(String packagePath, String ouputFilePath, boolean rebuildPackage) {
     try {
       HttpClientContext httpClientContext = pkgmgr.getPackageManagerHttpClientContext();
@@ -118,12 +117,10 @@ public final class PackageDownloader implements Closeable {
 
           // delete existing file
           File outputFileObject = new File(ouputFilePath);
-          if (outputFileObject.exists()) {
-            outputFileObject.delete();
-          }
+          Files.deleteIfExists(outputFileObject.toPath());
 
           // write response file
-          try (FileOutputStream fos = new FileOutputStream(outputFileObject)) {
+          try (OutputStream fos = Files.newOutputStream(outputFileObject.toPath())) {
             IOUtils.copy(responseStream, fos);
             fos.flush();
             responseStream.close();

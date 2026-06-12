@@ -43,8 +43,8 @@ public class CrxPackageDownloader implements VendorPackageDownloader {
   public String uploadPackageDefinition(String packageManagerUrl, File file, PackageManagerHelper pkgmgr) {
     HttpPost post = new HttpPost(packageManagerUrl + "/.json?cmd=upload");
     MultipartEntityBuilder entity = MultipartEntityBuilder.create()
-        .addBinaryBody("package", file)
-        .addTextBody("force", "true");
+      .addBinaryBody("package", file)
+      .addTextBody("force", "true");
     post.setEntity(entity.build());
     JSONObject jsonResponse = pkgmgr.executePackageManagerMethodJson(pkgmgr.getHttpClient(), pkgmgr.getPackageManagerHttpClientContext(), post);
     boolean success = jsonResponse.optBoolean("success", false);

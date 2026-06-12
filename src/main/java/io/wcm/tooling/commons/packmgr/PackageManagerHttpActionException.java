@@ -32,7 +32,9 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 /**
  * Exception during package manager HTTP actions.
  */
+@SuppressWarnings("java:S1192") // duplicate message strings
 public final class PackageManagerHttpActionException extends RuntimeException {
+
   private static final long serialVersionUID = 1L;
 
   /**

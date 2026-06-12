@@ -57,6 +57,7 @@ public final class PackageManagerJsonCall implements HttpCall<JSONObject> {
   }
 
   @Override
+  @SuppressWarnings("java:S1141") // nested try block
   public JSONObject execute() {
     log.debug("Call URL: {}", method.getURI());
 
