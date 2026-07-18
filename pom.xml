@@ -49,7 +49,7 @@
 
     <!-- versions -->
     <jackrabbit.version>2.22.3</jackrabbit.version>
-    <oak.version>2.2.0</oak.version>
+    <oak.version>2.4.0</oak.version>
 
     <!-- Enable reproducible builds -->
     <project.build.outputTimestamp>2026-06-12T15:17:26Z</project.build.outputTimestamp>
