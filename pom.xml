@@ -48,7 +48,7 @@
     <site.url.module.prefix>tooling/commons/crx-packmgr-helper</site.url.module.prefix>
 
     <!-- versions -->
-    <jackrabbit.version>2.22.3</jackrabbit.version>
+    <jackrabbit.version>2.22.4</jackrabbit.version>
     <oak.version>2.4.0</oak.version>
 
     <!-- Enable reproducible builds -->
