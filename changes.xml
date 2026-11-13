@@ -24,6 +24,12 @@
     xsi:schemaLocation="http://maven.apache.org/changes/2.0.0 https://maven.apache.org/xsd/changes-2.0.0.xsd">
   <body>
 
+    <release version="2.6.0" date="not released">
+      <action type="add" dev="sseifert">
+        Support setting dependencyHandling for package installation via CRX package manager.
+      </action>
+    </release>
+
     <release version="2.5.0" date="2026-06-12">
       <action type="update" dev="sseifert" issue="63">
         Improve reliability and security of File/Zip handling.

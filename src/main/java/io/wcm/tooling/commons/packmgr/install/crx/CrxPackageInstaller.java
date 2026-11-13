@@ -23,6 +23,7 @@ import static io.wcm.tooling.commons.packmgr.PackageManagerHelper.CRX_PACKAGE_EX
 
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.Locale;
 import java.util.Map;
 
 import org.apache.commons.lang3.Strings;
@@ -32,6 +33,7 @@ import org.apache.http.client.protocol.HttpClientContext;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.jackrabbit.vault.packaging.DependencyHandling;
 import org.apache.jackrabbit.vault.packaging.PackageProperties;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -118,8 +120,7 @@ public class CrxPackageInstaller implements VendorPackageInstaller {
         log.info("Package uploaded to {}, now installing...", path);
 
         try {
-          post = new HttpPost(url + "/console.html" + new URIBuilder().setPath(path).build().getRawPath() + "?cmd=install"
-              + (packageFile.isRecursive() ? "&recursive=true" : ""));
+          post = new HttpPost(buildInstallUrl(path, packageFile));
           HttpClientUtil.applyRequestConfig(post, packageFile, props);
         }
         catch (URISyntaxException ex) {
@@ -165,6 +166,23 @@ public class CrxPackageInstaller implements VendorPackageInstaller {
       // execute post
       pkgmgr.executePackageManagerMethodHtmlOutputResponse(httpClient, packageManagerHttpClientContext, post);
     }
+  }
+
+  String buildInstallUrl(String path, PackageFile packageFile) throws URISyntaxException {
+    StringBuilder installUrl = new StringBuilder()
+      .append(url)
+      .append("/console.html")
+      .append(new URIBuilder().setPath(path).build().getRawPath())
+      .append("?cmd=install");
+    if (packageFile.isRecursive()) {
+      installUrl.append("&recursive=true");
+    }
+    DependencyHandling dependencyHandling = packageFile.getDependencyHandling();
+    if (dependencyHandling != null) {
+      // AEM package manager UI also sends the value in lower case
+      installUrl.append("&dependencyHandling=").append(dependencyHandling.name().toLowerCase(Locale.ROOT));
+    }
+    return installUrl.toString();
   }
 
   @SuppressWarnings("PMD.GuardLogStatement")
