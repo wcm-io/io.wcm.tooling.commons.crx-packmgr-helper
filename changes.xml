@@ -25,7 +25,7 @@
   <body>
 
     <release version="2.6.0" date="not released">
-      <action type="add" dev="sseifert">
+      <action type="add" dev="sseifert" issue="90">
         Support setting dependencyHandling for package installation via CRX package manager.
       </action>
     </release>
