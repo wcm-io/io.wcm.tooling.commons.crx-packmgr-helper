@@ -25,6 +25,7 @@ import java.util.Map;
 import java.util.Objects;
 
 import org.apache.commons.lang3.Strings;
+import org.apache.jackrabbit.vault.packaging.DependencyHandling;
 
 import io.wcm.tooling.commons.packmgr.util.ContentPackageProperties;
 
@@ -38,6 +39,7 @@ public final class PackageFile {
   private boolean install = true;
   private Boolean force;
   private boolean recursive = true;
+  private DependencyHandling dependencyHandling;
   private Integer httpSocketTimeoutSec;
 
   private static final int DEFAULT_DELAY_AFTER_CONTAINER_PACKAGE_SEC = 3;
@@ -145,6 +147,25 @@ public final class PackageFile {
    */
   public void setRecursive(boolean recursive) {
     this.recursive = recursive;
+  }
+
+  /**
+   * Defines how package dependencies are handled on package installation.
+   * If not set, the package manager's default is used (<code>REQUIRED</code>).
+   * Only supported for CRX package manager.
+   * @return Dependency handling or null
+   */
+  public DependencyHandling getDependencyHandling() {
+    return this.dependencyHandling;
+  }
+
+  /**
+   * @param dependencyHandling Defines how package dependencies are handled on package installation.
+   *          If not set, the package manager's default is used (<code>REQUIRED</code>).
+   *          Only supported for CRX package manager.
+   */
+  public void setDependencyHandling(DependencyHandling dependencyHandling) {
+    this.dependencyHandling = dependencyHandling;
   }
 
   /**
